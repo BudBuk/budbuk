@@ -38,6 +38,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Excluded from the main Cargo workspace (built/run via `cargo pgrx`), keeping
     the engine's `cargo build/test` and the 100%-coverage gate independent.
   - Example setup SQL in `crates/jira-fdw/sql/example.sql`.
+- **Config-driven REST engine** (`crates/rest-connector`): one engine drives any
+  REST API from a declarative, `serde`-serializable `SourceSpec` — no per-source
+  code. Individual connectors and OpenAPI-generated connectors share it.
+  - `RestConnector` implements `Connector` (plugs into caching, tracing, the FDW).
+  - Auth (bearer/basic/API-key header or query), pagination (offset/page/none),
+    equality predicate pushdown (column → query param), dotted-path field mapping,
+    and JSON→neutral-value conversion — all declared in the spec.
+  - Demo CLI runs against the public JSONPlaceholder API with no credentials.
+  - **OpenAPI importer** (`SourceSpec::from_openapi` / `from_openapi_json`):
+    generates a spec from an OpenAPI 3 document — collection `GET`s become tables,
+    `$ref`s are resolved, response types map to columns, and query params become
+    equality-pushdown filters. The demo imports a bundled spec and queries live.
 - Project infrastructure: dual MIT/Apache-2.0 license, README and community docs,
   GitHub Actions CI (fmt, clippy, tests on stable + MSRV, 100% line-coverage gate,
   `cargo-deny`, docs), release workflow, Dependabot, and a `Makefile` of dev tasks.

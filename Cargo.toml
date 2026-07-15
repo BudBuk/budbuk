@@ -5,6 +5,7 @@ resolver = "2"
 members = [
     "crates/connector-sdk",
     "crates/jira-connector",
+    "crates/rest-connector",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be
 # built with plain `cargo build` (it needs a `pgXX` feature and links against

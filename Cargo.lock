@@ -951,6 +951,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "rest-connector"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "connector-sdk",
+ "dotenvy",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "wiremock",
+]
+
+[[package]]
 name = "ring"
 version = "0.17.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"

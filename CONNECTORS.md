@@ -12,7 +12,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** 1 / 101 shipped.
+**Progress:** 2 shipped — Jira, and the generic REST engine + OpenAPI importer.
 
 ## How connectors are prioritized
 
@@ -56,7 +56,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
-| 11 | ⬜ | **Generic REST / OpenAPI** | Meta | Configurable | Force multiplier — unlocks long-tail APIs |
+| 11 | ✅ | **Generic REST / OpenAPI** | Meta | Configurable | `rest-connector`: any API via a `SourceSpec`, hand-written or generated from an OpenAPI doc (`SourceSpec::from_openapi`) |
 | 12 | ⬜ | **Generic SQL database** | Database | DB credentials | Postgres/MySQL/etc. as a source |
 | 13 | ⬜ | **GitLab** | Dev | OAuth2 / PAT | GitHub sibling |
 | 14 | ⬜ | **Google Ads** | Ads | OAuth2 + developer token | Core marketing analytics |

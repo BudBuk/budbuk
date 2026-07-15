@@ -114,6 +114,11 @@ budbuk/
 │   │       ├── mock.rs         # canned sample data (no credentials needed)
 │   │       ├── cli.rs          # CLI orchestration (tested)
 │   │       └── main.rs         # thin binary entrypoint
+│   ├── rest-connector/    # Config-driven REST engine (one engine, any API)
+│   │   └── src/
+│   │       ├── spec.rs         # SourceSpec: declarative API description
+│   │       ├── connector.rs    # RestConnector (auth, pagination, pushdown)
+│   │       └── cli.rs          # demo against JSONPlaceholder (no auth)
 │   └── jira-fdw/          # PostgreSQL FDW extension (pgrx; excluded from workspace)
 │       ├── src/lib.rs          # ForeignDataWrapper → JiraConnector shim
 │       └── sql/example.sql     # CREATE SERVER / FOREIGN TABLE example
@@ -304,8 +309,12 @@ residual being error-propagation branches that don't fire on a successful run).
 - [ ] Metrics export (Prometheus / OpenTelemetry)
 - [ ] Persistent PostgreSQL-backed cache + incremental sync (shared across queries)
 - [ ] Secrets management (secure credential storage; OAuth flows)
+- [x] Config-driven **generic REST engine** (`rest-connector`) — any API from a
+      declarative `SourceSpec`; auth, pagination, and predicate pushdown built in
+- [x] **OpenAPI → `SourceSpec` importer** — auto-generate a connector from an
+      OpenAPI document (`SourceSpec::from_openapi`)
 - [ ] More connectors — see the prioritized [connector tracker](CONNECTORS.md)
-      (GitHub next, then a generic REST/OpenAPI connector, then Salesforce/Stripe)
+      (GitHub next, then Salesforce/Stripe)
 - [ ] Docker-based local development environment
 
 ## Contributing
