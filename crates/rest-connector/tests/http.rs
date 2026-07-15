@@ -142,6 +142,54 @@ async fn fetch_page_pagination_walks_pages() {
 }
 
 #[tokio::test]
+async fn fetch_cursor_pagination_follows_has_more() {
+    let server = MockServer::start().await;
+    // Stripe-style: {data:[...], has_more:bool}. Distinguish pages by `limit`
+    // value (page 1 requests limit=2, page 2 requests limit=1).
+    Mock::given(method("GET"))
+        .and(path("/items"))
+        .and(query_param("limit", "2"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "data": [{"id": "a"}, {"id": "b"}], "has_more": true
+        })))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/items"))
+        .and(query_param("starting_after", "b"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "data": [{"id": "c"}], "has_more": false
+        })))
+        .mount(&server)
+        .await;
+
+    let table = TableSpec {
+        name: "items".into(),
+        path: "/items".into(),
+        row_path: RowPath::Pointer {
+            pointer: "/data".into(),
+        },
+        columns: vec![col("id", "id", DataType::Text)],
+        pagination: Pagination::Cursor {
+            limit_param: "limit".into(),
+            cursor_param: "starting_after".into(),
+            cursor_field: "id".into(),
+            more_pointer: "/has_more".into(),
+            page_size: 2,
+        },
+        filters: vec![],
+    };
+    let spec = source(&server.uri(), table, AuthSpec::None);
+    let q = Query {
+        limit: Some(3),
+        ..Default::default()
+    };
+    let rows = RestConnector::new(spec).fetch("items", &q).await.unwrap();
+    assert_eq!(rows.len(), 3);
+    assert_eq!(rows[2].0[0].to_display_string(), "c");
+}
+
+#[tokio::test]
 async fn fetch_reads_rows_from_a_pointer() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))

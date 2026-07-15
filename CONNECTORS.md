@@ -12,7 +12,9 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** 3 shipped — Jira, the generic REST engine + OpenAPI importer, and GitHub.
+**Progress:** Shipped — Jira, GitHub, the generic REST engine + OpenAPI importer
+(which imports Stripe's official 104-table spec directly, with cursor pagination),
+and a generic PostgreSQL REST FDW.
 
 ## How connectors are prioritized
 
@@ -44,7 +46,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 1 | ✅ | **GitHub** | Dev | PAT / public | `github-connector`: repos, issues, gists, orgs as a ~90-line `SourceSpec` over the REST engine — no HTTP code |
 | 2 | ⬜ | **Salesforce** | CRM | OAuth2 | #1 CRM; SOQL → clean pushdown |
 | 3 | ⬜ | **Google Sheets** | Productivity | OAuth2 | Universal; in the original spec |
-| 4 | ⬜ | **Stripe** | Payments | API key | Clean tabular API; huge base |
+| 4 | ✅ | **Stripe** | Payments | API key (Bearer) | Imports directly from Stripe's official OpenAPI — 104 tables, cursor pagination auto-detected. No hand-written code; add a test key for live queries |
 | 5 | ⬜ | **Slack** | Comms | OAuth2 (bot) | Near-universal |
 | 6 | ⬜ | **HubSpot** | CRM/Marketing | OAuth2 / private-app token | Dominant mid-market |
 | 7 | ⬜ | **Google Analytics 4** | Analytics | OAuth2 | Near-universal web analytics |

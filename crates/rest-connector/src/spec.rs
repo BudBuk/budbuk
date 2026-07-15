@@ -110,6 +110,16 @@ pub enum Pagination {
         page_size: usize,
         start_page: usize,
     },
+    /// Cursor style (e.g. Stripe): send `limit_param`, and after the first page
+    /// send `cursor_param` set to the previous page's last row's `cursor_field`.
+    /// Continue while the boolean at `more_pointer` is true.
+    Cursor {
+        limit_param: String,
+        cursor_param: String,
+        cursor_field: String,
+        more_pointer: String,
+        page_size: usize,
+    },
 }
 
 /// Maps a column to the query parameter used to filter it (equality pushdown).
@@ -210,6 +220,13 @@ mod tests {
                 size_param: "n".into(),
                 page_size: 10,
                 start_page: 1,
+            },
+            Pagination::Cursor {
+                limit_param: "limit".into(),
+                cursor_param: "starting_after".into(),
+                cursor_field: "id".into(),
+                more_pointer: "/has_more".into(),
+                page_size: 100,
             },
         ] {
             let s = serde_json::to_string(&pg).unwrap();

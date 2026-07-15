@@ -51,6 +51,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     `$ref`s are resolved, response types map to columns, and query params become
     equality-pushdown filters. The demo imports a bundled spec and queries live.
   - The REST client now sends a default `User-Agent` (required by some APIs).
+  - **Cursor pagination** (`Pagination::Cursor`, e.g. Stripe's `limit` +
+    `starting_after` + `has_more`); the importer auto-detects it, and gained an
+    `ImportOptions.include` filter to focus a large spec on a few tables.
+  - Composed schemas (`anyOf`/`oneOf`/`allOf`, e.g. Stripe's expandable
+    "id-or-object" fields) map to their first scalar branch, so ids stay `text`
+    rather than quoted JSON.
+  - Verified: **Stripe's official OpenAPI (104 tables) imports directly** into a
+    working spec — correct columns, pushdown filters, and cursor pagination —
+    with no Stripe-specific code, and queried live from `psql` (JOIN across two
+    Stripe foreign tables) via the generic REST FDW.
 - **GitHub connector** (`crates/github-connector`): repos, issues, gists, and
   orgs exposed as a ~90-line `SourceSpec` over the REST engine — no bespoke HTTP
   code. Works unauthenticated against public data or with a personal access

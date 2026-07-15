@@ -36,6 +36,9 @@ pub struct ImportOptions {
     pub name: Option<String>,
     pub base_url: Option<String>,
     pub auth: AuthSpec,
+    /// If set, only tables whose name is in this list are kept (a big spec like
+    /// Stripe's exposes ~100 tables; use this to focus on a few).
+    pub include: Option<Vec<String>>,
 }
 
 impl SourceSpec {
@@ -79,6 +82,7 @@ fn import(doc: &Json, opts: ImportOptions) -> Result<SourceSpec, ImportError> {
         .and_then(Json::as_object)
         .ok_or_else(|| ImportError::Invalid("missing 'paths'".into()))?;
 
+    let include = opts.include.clone();
     let mut tables: Vec<TableSpec> = Vec::new();
     let mut used_names: Vec<String> = Vec::new();
 
@@ -109,18 +113,37 @@ fn import(doc: &Json, opts: ImportOptions) -> Result<SourceSpec, ImportError> {
             })
             .collect();
 
-        let filters: Vec<FilterParam> = query_params(op)
-            .into_iter()
+        let qparams = query_params(op);
+        let filters: Vec<FilterParam> = qparams
+            .iter()
             .filter(|p| props.contains_key(p.as_str()))
             .map(|p| FilterParam {
                 column: p.clone(),
-                param: p,
+                param: p.clone(),
             })
             .collect();
+
+        // Detect cursor pagination (Stripe-style: `starting_after` + `limit`).
+        let pagination = if qparams.iter().any(|p| p == "starting_after") {
+            Pagination::Cursor {
+                limit_param: "limit".to_string(),
+                cursor_param: "starting_after".to_string(),
+                cursor_field: "id".to_string(),
+                more_pointer: "/has_more".to_string(),
+                page_size: 100,
+            }
+        } else {
+            Pagination::None
+        };
 
         let raw = last_segment(path)
             .or_else(|| op.get("operationId").and_then(Json::as_str).map(sanitize))
             .unwrap_or_default();
+        if let Some(inc) = &include {
+            if !inc.iter().any(|n| n == &raw) {
+                continue;
+            }
+        }
         let table_name = dedup(raw, &mut used_names);
 
         tables.push(TableSpec {
@@ -128,7 +151,7 @@ fn import(doc: &Json, opts: ImportOptions) -> Result<SourceSpec, ImportError> {
             path: path.clone(),
             row_path,
             columns,
-            pagination: Pagination::None,
+            pagination,
             filters,
         });
     }
@@ -213,18 +236,37 @@ fn resolve<'a>(doc: &'a Json, node: &'a Json) -> &'a Json {
     cur
 }
 
-/// Map an OpenAPI property schema to a neutral column type.
+/// Map an OpenAPI property schema to a neutral column type. Composed schemas
+/// (`anyOf`/`oneOf`/`allOf`, e.g. Stripe's expandable "id-or-object" fields) use
+/// their first scalar branch, so an id string stays `Text` rather than `Json`.
 fn schema_datatype(doc: &Json, sch: &Json) -> DataType {
     let sch = resolve(doc, sch);
-    match sch.get("type").and_then(Json::as_str) {
-        Some("integer") => DataType::Integer,
-        Some("number") => DataType::Float,
-        Some("boolean") => DataType::Bool,
-        Some("string") => match sch.get("format").and_then(Json::as_str) {
+    if let Some(dt) = scalar_datatype(sch) {
+        return dt;
+    }
+    for key in ["anyOf", "oneOf", "allOf"] {
+        if let Some(branches) = sch.get(key).and_then(Json::as_array) {
+            for branch in branches {
+                if let Some(dt) = scalar_datatype(resolve(doc, branch)) {
+                    return dt;
+                }
+            }
+        }
+    }
+    DataType::Json // object, array, or unknown
+}
+
+/// A schema's own scalar type, if it has one (`None` for object/array/composed).
+fn scalar_datatype(sch: &Json) -> Option<DataType> {
+    match sch.get("type").and_then(Json::as_str)? {
+        "integer" => Some(DataType::Integer),
+        "number" => Some(DataType::Float),
+        "boolean" => Some(DataType::Bool),
+        "string" => Some(match sch.get("format").and_then(Json::as_str) {
             Some("date-time") | Some("date") => DataType::Timestamp,
             _ => DataType::Text,
-        },
-        _ => DataType::Json, // object, array, or unknown
+        }),
+        _ => None,
     }
 }
 
@@ -447,6 +489,65 @@ mod tests {
     }
 
     #[test]
+    fn composed_schemas_map_to_first_scalar_branch() {
+        // cust -> Text (first scalar of anyOf), amt -> Integer (oneOf),
+        // code -> Text (allOf), blob -> Json (no scalar branch).
+        let props = json!({
+            "cust": {"anyOf": [{"type": "object"}, {"type": "string"}]},
+            "amt":  {"oneOf": [{"type": "integer"}]},
+            "code": {"allOf": [{"type": "string"}]},
+            "blob": {"anyOf": [{"type": "object"}, {"type": "array"}]}
+        });
+        let items = json!({"type": "object", "properties": props});
+        let schema = json!({"type": "array", "items": items});
+        let doc = json!({
+            "servers": [{"url": "https://x"}],
+            "paths": {"/t": {"get": {"responses": {"200": {"content":
+                {"application/json": {"schema": schema}}}}}}}
+        });
+        let spec = SourceSpec::from_openapi(&doc, ImportOptions::default()).unwrap();
+        let t = spec.table("t").unwrap();
+        let ty = |n: &str| t.columns.iter().find(|c| c.name == n).unwrap().data_type;
+        assert_eq!(ty("cust"), DataType::Text);
+        assert_eq!(ty("amt"), DataType::Integer);
+        assert_eq!(ty("code"), DataType::Text);
+        assert_eq!(ty("blob"), DataType::Json);
+    }
+
+    #[test]
+    fn detects_cursor_pagination_and_include_filters_tables() {
+        let doc = json!({
+            "servers": [{"url": "https://api.stripe.com"}],
+            "paths": {
+                "/v1/customers": {"get": {
+                    "parameters": [
+                        {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+                        {"name": "starting_after", "in": "query", "schema": {"type": "string"}}
+                    ],
+                    "responses": {"200": {"content": {"application/json": {"schema":
+                        {"type": "object", "properties": {
+                            "data": {"type": "array", "items": {"type": "object",
+                                "properties": {"id": {"type": "string"}}}},
+                            "has_more": {"type": "boolean"}}}}}}}
+                }},
+                "/v1/charges": {"get": {"responses": {"200": {"content": {"application/json":
+                    {"schema": {"type": "array", "items": {"type": "object",
+                        "properties": {"id": {"type": "string"}}}}}}}}}}
+            }
+        });
+        // include only "customers" → charges is skipped.
+        let opts = ImportOptions {
+            include: Some(vec!["customers".to_string()]),
+            ..Default::default()
+        };
+        let spec = SourceSpec::from_openapi(&doc, opts).unwrap();
+        assert_eq!(spec.tables.len(), 1);
+        let customers = spec.table("customers").unwrap();
+        assert!(matches!(customers.pagination, Pagination::Cursor { .. }));
+        assert!(matches!(customers.row_path, RowPath::Pointer { .. }));
+    }
+
+    #[test]
     fn accepts_first_2xx_response_when_no_200() {
         let doc = json!({
             "servers": [{"url": "https://x"}],
@@ -471,6 +572,7 @@ mod tests {
             name: Some("custom".into()),
             base_url: Some("https://override".into()),
             auth: AuthSpec::Bearer { token: "t".into() },
+            include: None,
         };
         let spec = SourceSpec::from_openapi(&doc, opts.clone()).unwrap();
         assert_eq!(spec.name, "custom");

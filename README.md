@@ -346,11 +346,12 @@ residual being error-propagation branches that don't fire on a successful run).
 - [x] Config-driven **generic REST engine** (`rest-connector`) — any API from a
       declarative `SourceSpec`; auth, pagination, and predicate pushdown built in
 - [x] **OpenAPI → `SourceSpec` importer** — auto-generate a connector from an
-      OpenAPI document (`SourceSpec::from_openapi`)
+      OpenAPI document (`SourceSpec::from_openapi`); imports **Stripe's official
+      104-table spec** directly, with cursor pagination auto-detected
 - [x] **GitHub** connector (`github-connector`) — repos/issues/gists/orgs as a
       `SourceSpec` over the engine, no bespoke HTTP code
 - [ ] More connectors — see the prioritized [connector tracker](CONNECTORS.md)
-      (Stripe next, then the GraphQL importer and generic SQL connector)
+      (the GraphQL importer and generic SQL connector unlock ~25 more sources)
 - [ ] Docker-based local development environment
 
 ## Contributing

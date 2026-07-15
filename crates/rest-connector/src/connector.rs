@@ -145,6 +145,36 @@ impl Connector for RestConnector {
                     }
                 }
             }
+            Pagination::Cursor {
+                limit_param,
+                cursor_param,
+                cursor_field,
+                more_pointer,
+                page_size,
+            } => {
+                let mut cursor: Option<String> = None;
+                loop {
+                    let want = (limit - rows.len()).min(*page_size);
+                    let mut params = base_params.clone();
+                    params.push((limit_param.clone(), want.to_string()));
+                    if let Some(c) = &cursor {
+                        params.push((cursor_param.clone(), c.clone()));
+                    }
+                    let body = self.get_body(table, &params).await?;
+                    let batch = extract_rows(table, &body)?;
+                    let n = batch.len();
+                    let next = last_cursor(table, &body, cursor_field);
+                    let has_more = body
+                        .pointer(more_pointer)
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+                    rows.extend(batch);
+                    match next {
+                        Some(c) if has_more && rows.len() < limit && n > 0 => cursor = Some(c),
+                        _ => break,
+                    }
+                }
+            }
         }
         rows.truncate(limit);
         Ok(rows)
@@ -191,6 +221,21 @@ fn extract_rows(table: &TableSpec, body: &serde_json::Value) -> Result<Vec<Row>>
             Row(cells)
         })
         .collect())
+}
+
+/// The `cursor_field` value of the last record in a response, as a string —
+/// used as the `starting_after` cursor for the next page.
+fn last_cursor(table: &TableSpec, body: &serde_json::Value, cursor_field: &str) -> Option<String> {
+    let arr = match &table.row_path {
+        RowPath::Root => body.as_array(),
+        RowPath::Pointer { pointer } => body.pointer(pointer).and_then(|v| v.as_array()),
+    }?;
+    let last = arr.last()?;
+    match resolve_field(last, cursor_field)? {
+        serde_json::Value::String(s) => Some(s.clone()),
+        serde_json::Value::Null => None,
+        other => Some(other.to_string()),
+    }
 }
 
 /// Resolve a dotted field path (e.g. `"user.login"`) within a record.
@@ -327,5 +372,45 @@ mod tests {
         };
         let params = pushdown_params(&table, &query);
         assert_eq!(params, vec![("userId".to_string(), "1".to_string())]);
+    }
+
+    fn table_with(row_path: RowPath) -> TableSpec {
+        TableSpec {
+            name: "t".into(),
+            path: "/t".into(),
+            row_path,
+            columns: vec![],
+            pagination: Pagination::None,
+            filters: vec![],
+        }
+    }
+
+    #[test]
+    fn last_cursor_reads_last_rows_field_across_shapes() {
+        let root = table_with(RowPath::Root);
+        // Root array, string id.
+        assert_eq!(
+            last_cursor(&root, &json!([{"id": "a"}, {"id": "b"}]), "id"),
+            Some("b".into())
+        );
+        // Non-string id is stringified.
+        assert_eq!(
+            last_cursor(&root, &json!([{"id": 42}]), "id"),
+            Some("42".into())
+        );
+        // Empty array, missing field, and null field all yield None.
+        assert_eq!(last_cursor(&root, &json!([]), "id"), None);
+        assert_eq!(last_cursor(&root, &json!([{"x": 1}]), "id"), None);
+        assert_eq!(last_cursor(&root, &json!([{"id": null}]), "id"), None);
+        // Pointer wrapper.
+        let ptr = table_with(RowPath::Pointer {
+            pointer: "/data".into(),
+        });
+        assert_eq!(
+            last_cursor(&ptr, &json!({"data": [{"id": "z"}]}), "id"),
+            Some("z".into())
+        );
+        // Pointer missing → None.
+        assert_eq!(last_cursor(&ptr, &json!({"other": []}), "id"), None);
     }
 }
