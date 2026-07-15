@@ -24,6 +24,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     best-effort push and reporting of un-pushable filters.
   - Mock mode: runs with built-in sample data and no credentials.
   - Demo CLI (`jira-cli`) showing discovery, caching, and pushdown.
+- **Observability**: structured logging/tracing via the `tracing` crate.
+  - Cache events (`hit`/`miss`/`stale`/`expired`) and HTTP request timing
+    (`url`, `status`, `elapsed_ms`) as structured `tracing` events.
+  - Cache metrics counters exposed via `CachedConnector::metrics()`
+    (`CacheMetricsSnapshot`: hits, misses, stale, expired, refreshes).
+  - CLI installs a `tracing-subscriber`; log level is controlled by `RUST_LOG`
+    (e.g. `RUST_LOG=budbuk::cache=debug`).
 - Project infrastructure: dual MIT/Apache-2.0 license, README and community docs,
   GitHub Actions CI (fmt, clippy, tests on stable + MSRV, 100% line-coverage gate,
   `cargo-deny`, docs), release workflow, Dependabot, and a `Makefile` of dev tasks.

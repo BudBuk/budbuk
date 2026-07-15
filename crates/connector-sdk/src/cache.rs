@@ -16,6 +16,7 @@
 //!     without making the caller wait).
 
 use std::collections::{HashMap, HashSet};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -79,6 +80,63 @@ impl Cache {
     }
 }
 
+/// Live cache counters, for observability. Cheap to clone (shares the atomics)
+/// and safe to read/update concurrently.
+#[derive(Clone, Default)]
+pub struct CacheMetrics {
+    inner: Arc<CacheMetricsInner>,
+}
+
+#[derive(Default)]
+struct CacheMetricsInner {
+    hits: AtomicU64,
+    misses: AtomicU64,
+    stale: AtomicU64,
+    expired: AtomicU64,
+    refreshes: AtomicU64,
+}
+
+/// A point-in-time copy of the cache counters, e.g. for logging or a `/metrics`
+/// endpoint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct CacheMetricsSnapshot {
+    pub hits: u64,
+    pub misses: u64,
+    pub stale: u64,
+    pub expired: u64,
+    pub refreshes: u64,
+}
+
+impl CacheMetrics {
+    fn record_hit(&self) {
+        self.inner.hits.fetch_add(1, Ordering::Relaxed);
+    }
+    fn record_miss(&self) {
+        self.inner.misses.fetch_add(1, Ordering::Relaxed);
+    }
+    fn record_stale(&self) {
+        self.inner.stale.fetch_add(1, Ordering::Relaxed);
+    }
+    fn record_expired(&self) {
+        self.inner.expired.fetch_add(1, Ordering::Relaxed);
+    }
+    fn record_refresh(&self) {
+        self.inner.refreshes.fetch_add(1, Ordering::Relaxed);
+    }
+
+    /// Read all counters into a snapshot.
+    pub fn snapshot(&self) -> CacheMetricsSnapshot {
+        let i = &self.inner;
+        CacheMetricsSnapshot {
+            hits: i.hits.load(Ordering::Relaxed),
+            misses: i.misses.load(Ordering::Relaxed),
+            stale: i.stale.load(Ordering::Relaxed),
+            expired: i.expired.load(Ordering::Relaxed),
+            refreshes: i.refreshes.load(Ordering::Relaxed),
+        }
+    }
+}
+
 /// Wraps a connector and serves its `fetch` results from a `Cache`.
 pub struct CachedConnector<C> {
     inner: Arc<C>,
@@ -91,6 +149,8 @@ pub struct CachedConnector<C> {
     /// After `ttl`, how long we'll still serve the stale copy (while refreshing
     /// in the background) before forcing a synchronous refetch.
     stale_window: Duration,
+    /// Observability counters for this connector's cache.
+    metrics: CacheMetrics,
 }
 
 impl<C: Connector + 'static> CachedConnector<C> {
@@ -107,7 +167,13 @@ impl<C: Connector + 'static> CachedConnector<C> {
             namespace: namespace.into(),
             ttl,
             stale_window,
+            metrics: CacheMetrics::default(),
         }
+    }
+
+    /// A snapshot of this connector's cache counters (hits, misses, …).
+    pub fn metrics(&self) -> CacheMetricsSnapshot {
+        self.metrics.snapshot()
     }
 
     /// Build the namespaced cache key: account + table + query.
@@ -122,6 +188,7 @@ impl<C: Connector + 'static> CachedConnector<C> {
         if !self.cache.begin_refresh(&key) {
             return; // another task is already refreshing this key
         }
+        self.metrics.record_refresh();
         let inner = Arc::clone(&self.inner);
         let cache = self.cache.clone();
         tokio::spawn(async move {
@@ -129,7 +196,7 @@ impl<C: Connector + 'static> CachedConnector<C> {
                 cache.store(key.clone(), rows);
             }
             cache.end_refresh(&key);
-            eprintln!("[cache] background refresh complete: {key}");
+            tracing::debug!(target: "budbuk::cache", key = %key, "background refresh complete");
         });
     }
 }
@@ -149,21 +216,26 @@ impl<C: Connector + 'static> Connector for CachedConnector<C> {
         let key = self.key_for(table, query);
 
         if let Some((rows, age)) = self.cache.lookup(&key) {
+            let age_ms = age.as_millis() as u64;
             if age < self.ttl {
                 // FRESH: serve straight from cache — the fast path.
-                eprintln!("[cache] HIT     {key} (age {age:?})");
+                self.metrics.record_hit();
+                tracing::debug!(target: "budbuk::cache", event = "hit", key = %key, age_ms, "cache hit");
                 return Ok(rows);
             }
             if age < self.ttl + self.stale_window {
                 // STALE: serve the old copy NOW, refresh in the background.
                 // The caller never waits on the network.
-                eprintln!("[cache] STALE   {key} (age {age:?}) — serving stale + refreshing");
+                self.metrics.record_stale();
+                tracing::debug!(target: "budbuk::cache", event = "stale", key = %key, age_ms, "serving stale, refreshing");
                 self.spawn_refresh(key, table.to_string(), query.clone());
                 return Ok(rows);
             }
-            eprintln!("[cache] EXPIRED {key} (age {age:?}) — refetching");
+            self.metrics.record_expired();
+            tracing::debug!(target: "budbuk::cache", event = "expired", key = %key, age_ms, "cache expired, refetching");
         } else {
-            eprintln!("[cache] MISS    {key} — fetching");
+            self.metrics.record_miss();
+            tracing::debug!(target: "budbuk::cache", event = "miss", key = %key, "cache miss, fetching");
         }
 
         // MISS or fully expired: fetch synchronously, store, return.
@@ -175,7 +247,7 @@ impl<C: Connector + 'static> Connector for CachedConnector<C> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Cache, CachedConnector};
+    use super::{Cache, CacheMetrics, CacheMetricsSnapshot, CachedConnector};
     use crate::connector::Connector;
     use crate::error::{ConnectorError, Result};
     use crate::types::{Query, Row, TableSchema, Value};
@@ -316,6 +388,8 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(70)).await; // past ttl + stale_window
         assert_eq!(cell(&c.fetch("t", &q).await.unwrap()), 2); // fresh refetch
         assert_eq!(calls.load(Ordering::SeqCst), 2);
+        assert_eq!(c.metrics().expired, 1);
+        assert_eq!(c.metrics().misses, 1);
     }
 
     #[tokio::test]
@@ -333,6 +407,8 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(70)).await; // into the stale window
         assert_eq!(cell(&c.fetch("t", &q).await.unwrap()), 1); // STALE: old value now
         wait_for(|| calls.load(Ordering::SeqCst) == 2).await; // background refresh ran
+        assert_eq!(c.metrics().stale, 1);
+        assert_eq!(c.metrics().refreshes, 1);
     }
 
     #[tokio::test]
@@ -377,5 +453,45 @@ mod tests {
         );
         let err = c.fetch("t", &Query::default()).await.unwrap_err();
         assert!(matches!(err, ConnectorError::Other(_)));
+    }
+
+    #[tokio::test]
+    async fn metrics_snapshot_tracks_hits_and_misses() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let c = CachedConnector::new(
+            counting("jira", calls),
+            Cache::new(),
+            "ns",
+            Duration::from_secs(60),
+            Duration::from_secs(60),
+        );
+        let q = Query::default();
+        c.fetch("t", &q).await.unwrap(); // miss
+        c.fetch("t", &q).await.unwrap(); // hit
+        let m = c.metrics();
+        assert_eq!(m.misses, 1);
+        assert_eq!(m.hits, 1);
+        // Exercise the snapshot derives: Copy, PartialEq, Debug, Default.
+        let copied = m;
+        assert_eq!(m, copied);
+        assert!(format!("{m:?}").contains("hits"));
+        assert_eq!(CacheMetricsSnapshot::default().hits, 0);
+    }
+
+    #[test]
+    fn metrics_handles_share_counters_and_record_every_event() {
+        let m = CacheMetrics::default();
+        let handle = m.clone(); // shares the same atomics via Arc
+        m.record_hit();
+        m.record_miss();
+        m.record_stale();
+        m.record_expired();
+        m.record_refresh();
+        let snap = handle.snapshot();
+        assert_eq!(snap.hits, 1);
+        assert_eq!(snap.misses, 1);
+        assert_eq!(snap.stale, 1);
+        assert_eq!(snap.expired, 1);
+        assert_eq!(snap.refreshes, 1);
     }
 }

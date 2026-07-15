@@ -9,6 +9,8 @@
 //!   (`nextPageToken`) for issue search, and offset-based (`startAt`) for
 //!   projects and users. We loop until we have enough rows or run out of pages.
 
+use std::time::Instant;
+
 use connector_sdk::{ConnectorError, Result, Row, Value};
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
@@ -39,6 +41,7 @@ impl JiraClient {
     /// Shared helper: GET `url` with basic auth + query params, parse JSON into
     /// any `T`. Every endpoint below is built on this one function.
     async fn get_json<T: DeserializeOwned>(&self, url: &str, query: &[(&str, &str)]) -> Result<T> {
+        let started = Instant::now();
         let response = self
             .http
             .get(url)
@@ -50,6 +53,8 @@ impl JiraClient {
             .map_err(|e| ConnectorError::Network(e.to_string()))?;
 
         let status = response.status();
+        let elapsed_ms = started.elapsed().as_millis() as u64;
+        tracing::debug!(target: "budbuk::jira", %url, status = status.as_u16(), elapsed_ms);
         if !status.is_success() {
             let body = response.text().await.unwrap_or_default();
             return Err(match status.as_u16() {

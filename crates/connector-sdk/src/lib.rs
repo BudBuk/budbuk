@@ -16,7 +16,7 @@ pub mod types;
 
 // Re-exports: pull the most-used items up to the crate root so users can write
 // `connector_sdk::Connector` instead of `connector_sdk::connector::Connector`.
-pub use cache::{Cache, CachedConnector};
+pub use cache::{Cache, CacheMetrics, CacheMetricsSnapshot, CachedConnector};
 pub use connector::Connector;
 pub use error::{ConnectorError, Result};
 pub use types::{Column, DataType, Filter, Operator, Query, Row, SortKey, TableSchema, Value};

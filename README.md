@@ -200,6 +200,26 @@ let side = JiraConnector::new(JiraConfig {
 
 Credentials, rate-limit state, and cache entries are isolated per account.
 
+## Observability
+
+BudBuk emits structured logs via the [`tracing`](https://docs.rs/tracing) crate. The
+demo CLI installs a subscriber; control the level with `RUST_LOG`:
+
+```bash
+RUST_LOG="budbuk::cache=debug,budbuk::jira=debug" cargo run -p jira-connector
+```
+
+You'll see cache events and HTTP request timing as structured fields:
+
+```
+DEBUG budbuk::cache: cache miss, fetching  event="miss" key=https://…:issues:f[]|s[]|p[*]|l[3]
+DEBUG budbuk::jira:  url=https://…/rest/api/3/search/jql status=200 elapsed_ms=303
+```
+
+Cache counters are available programmatically via `CachedConnector::metrics()`, which
+returns a `CacheMetricsSnapshot` (`hits`, `misses`, `stale`, `expired`, `refreshes`) —
+ready to feed a `/metrics` endpoint.
+
 ## Development
 
 Common tasks are in the [`Makefile`](Makefile):
@@ -227,7 +247,8 @@ residual being error-propagation branches that don't fire on a successful run).
 - [x] Pagination (token-based and offset-based)
 - [x] Caching: TTL + stale-while-revalidate + per-account namespacing
 - [x] Predicate pushdown (`WHERE` / `ORDER BY` / `LIMIT` → JQL)
-- [ ] Observability: structured logging + tracing + metrics
+- [x] Observability: structured logging + tracing + cache metrics
+- [ ] Metrics export (Prometheus / OpenTelemetry)
 - [ ] PostgreSQL FDW layer via [`pgrx`](https://github.com/pgcentralfoundation/pgrx)
 - [ ] Persistent PostgreSQL-backed cache + incremental sync
 - [ ] Secrets management (secure credential storage; OAuth flows)

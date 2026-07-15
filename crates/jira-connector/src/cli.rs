@@ -38,8 +38,20 @@ pub fn build_connector_from_env() -> (JiraConnector, String, &'static str) {
     }
 }
 
-/// Entry point used by `main`: build from env, then run the demo.
+/// Install a `tracing` subscriber that writes structured logs to stderr.
+/// The level is controlled by the `RUST_LOG` env var (default `info`); use
+/// e.g. `RUST_LOG=budbuk::cache=debug` to see cache hit/miss events.
+/// Safe to call more than once — a second call is a no-op.
+pub fn init_tracing() {
+    use tracing_subscriber::{fmt, EnvFilter};
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    // `try_init` returns Err if a global subscriber is already set; ignore it.
+    let _ = fmt().with_env_filter(filter).with_target(true).try_init();
+}
+
+/// Entry point used by `main`: set up logging, build from env, run the demo.
 pub async fn run() -> anyhow::Result<()> {
+    init_tracing();
     let (base, namespace, mode) = build_connector_from_env();
     run_with(base, namespace, mode).await
 }
@@ -95,6 +107,13 @@ pub async fn run_with<C: Connector + 'static>(
             Err(e) => println!("  (error: {e})"),
         }
     }
+
+    // Observability: a snapshot of this connector's cache counters.
+    let m = connector.metrics();
+    println!(
+        "\ncache metrics: hits={} misses={} stale={} expired={} refreshes={}",
+        m.hits, m.misses, m.stale, m.expired, m.refreshes
+    );
 
     Ok(())
 }
@@ -299,6 +318,13 @@ mod tests {
         ]);
         assert_eq!(project_cell(&full), "ENG");
         assert_eq!(project_cell(&Row(vec![])), "");
+    }
+
+    #[test]
+    fn init_tracing_is_idempotent() {
+        // Safe to call repeatedly; the second call is a no-op.
+        init_tracing();
+        init_tracing();
     }
 
     #[tokio::test]

@@ -98,7 +98,7 @@ impl Connector for JiraConnector {
                 // PUSHDOWN: build JQL from the query's filters + sort so Jira
                 // does the filtering server-side instead of us over-fetching.
                 let built = jql::build_issues_jql(&query.filters, &query.sort);
-                eprintln!("[pushdown] issues JQL: {}", built.jql);
+                tracing::debug!(target: "budbuk::jira", jql = %built.jql, "issues predicate pushdown");
                 self.client.issues(&built.jql, limit).await
             }
             "users" => self.client.users(limit).await,
