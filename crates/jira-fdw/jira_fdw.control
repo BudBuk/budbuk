@@ -1,0 +1,6 @@
+comment = 'BudBuk Jira foreign data wrapper'
+default_version = '@CARGO_VERSION@'
+module_pathname = '$libdir/jira_fdw'
+relocatable = false
+superuser = true
+trusted = false

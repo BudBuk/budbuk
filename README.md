@@ -14,10 +14,11 @@
 
 ---
 
-> **Status: early proof of concept.** The connector engine (schema discovery, live
-> REST fetching, pagination, caching, and predicate pushdown) works today against a
-> real Jira Cloud instance. The PostgreSQL Foreign Data Wrapper (FDW) layer is on the
-> roadmap — see [Roadmap](#roadmap).
+> **Status: working proof of concept.** The connector engine (schema discovery, live
+> REST fetching, pagination, caching, predicate pushdown, and observability) works
+> today against a real Jira Cloud instance — and a PostgreSQL Foreign Data Wrapper
+> (built on `pgrx`) lets you `SELECT` from it directly in `psql`. See
+> [Querying from PostgreSQL](#querying-from-postgresql-the-fdw).
 
 ## What is BudBuk?
 
@@ -105,14 +106,17 @@ budbuk/
 │   │       ├── types.rs        # Value, Row, Column, TableSchema, Query, Filter, ...
 │   │       ├── error.rs        # ConnectorError + Result
 │   │       └── cache.rs        # Cache + CachedConnector (TTL + SWR decorator)
-│   └── jira-connector/    # The Jira connector + demo CLI
-│       └── src/
-│           ├── lib.rs          # JiraConnector (implements Connector)
-│           ├── client.rs       # async Jira REST client + pagination
-│           ├── jql.rs          # WHERE/ORDER BY → JQL pushdown
-│           ├── mock.rs         # canned sample data (no credentials needed)
-│           ├── cli.rs          # CLI orchestration (tested)
-│           └── main.rs         # thin binary entrypoint
+│   ├── jira-connector/    # The Jira connector + demo CLI
+│   │   └── src/
+│   │       ├── lib.rs          # JiraConnector (implements Connector)
+│   │       ├── client.rs       # async Jira REST client + pagination
+│   │       ├── jql.rs          # WHERE/ORDER BY → JQL pushdown
+│   │       ├── mock.rs         # canned sample data (no credentials needed)
+│   │       ├── cli.rs          # CLI orchestration (tested)
+│   │       └── main.rs         # thin binary entrypoint
+│   └── jira-fdw/          # PostgreSQL FDW extension (pgrx; excluded from workspace)
+│       ├── src/lib.rs          # ForeignDataWrapper → JiraConnector shim
+│       └── sql/example.sql     # CREATE SERVER / FOREIGN TABLE example
 ├── docs/                  # design specs
 ├── .github/workflows/     # CI + release
 └── Makefile               # dev tasks
@@ -200,6 +204,53 @@ let side = JiraConnector::new(JiraConfig {
 
 Credentials, rate-limit state, and cache entries are isolated per account.
 
+## Querying from PostgreSQL (the FDW)
+
+The `crates/jira-fdw` crate is a PostgreSQL Foreign Data Wrapper — a native extension
+(built with [`pgrx`](https://github.com/pgcentralfoundation/pgrx)) that lets you query
+Jira with plain SQL. It's a thin shim: Postgres's scan callbacks are forwarded to the
+`JiraConnector` engine, and `WHERE` / `ORDER BY` / `LIMIT` are pushed down to JQL.
+
+> The FDW is **excluded from the main Cargo workspace** — it needs a `pgXX` feature and
+> links against PostgreSQL, so it's built and run with `cargo pgrx`, keeping the
+> engine's `cargo build/test` and the 100%-coverage gate independent.
+
+Prerequisites: PostgreSQL 14 and the pgrx toolchain (one-time setup):
+
+```bash
+cargo install cargo-pgrx --version 0.16.1 --locked
+cargo pgrx init --pg14 "$(which pg_config)"
+```
+
+Run it (compiles the extension, starts a managed Postgres, opens `psql`):
+
+```bash
+cd crates/jira-fdw
+cargo pgrx run pg14
+```
+
+Then, in `psql`, set up the wrapper and query (full script in
+[`crates/jira-fdw/sql/example.sql`](crates/jira-fdw/sql/example.sql)):
+
+```sql
+CREATE EXTENSION jira_fdw;
+CREATE FOREIGN DATA WRAPPER jira_wrapper
+    HANDLER jira_fdw_handler VALIDATOR jira_fdw_validator;
+CREATE SERVER jira_account FOREIGN DATA WRAPPER jira_wrapper
+    OPTIONS (base_url 'https://your-domain.atlassian.net',
+             email 'you@example.com', api_token '…');
+CREATE FOREIGN TABLE jira_issues (
+    key text, summary text, status text, assignee text, project text, created text
+) SERVER jira_account OPTIONS (object 'issues');
+
+SELECT key, status FROM jira_issues WHERE project = 'ENG' LIMIT 5;
+--  ^ the WHERE clause is pushed down to Jira as JQL
+```
+
+> **Security note:** for this proof of concept, credentials live in the `SERVER`
+> options (visible to superusers in the catalogs). A hardened deployment should source
+> secrets from a secrets manager. See [Roadmap](#roadmap).
+
 ## Observability
 
 BudBuk emits structured logs via the [`tracing`](https://docs.rs/tracing) crate. The
@@ -248,9 +299,10 @@ residual being error-propagation branches that don't fire on a successful run).
 - [x] Caching: TTL + stale-while-revalidate + per-account namespacing
 - [x] Predicate pushdown (`WHERE` / `ORDER BY` / `LIMIT` → JQL)
 - [x] Observability: structured logging + tracing + cache metrics
+- [x] PostgreSQL FDW layer via [`pgrx`](https://github.com/pgcentralfoundation/pgrx) —
+      `SELECT` from Jira in `psql`, with predicate pushdown
 - [ ] Metrics export (Prometheus / OpenTelemetry)
-- [ ] PostgreSQL FDW layer via [`pgrx`](https://github.com/pgcentralfoundation/pgrx)
-- [ ] Persistent PostgreSQL-backed cache + incremental sync
+- [ ] Persistent PostgreSQL-backed cache + incremental sync (shared across queries)
 - [ ] Secrets management (secure credential storage; OAuth flows)
 - [ ] More connectors: GitHub, Slack, Salesforce, Google Sheets, generic REST/DB
 - [ ] Docker-based local development environment

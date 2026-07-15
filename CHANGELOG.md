@@ -31,6 +31,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     (`CacheMetricsSnapshot`: hits, misses, stale, expired, refreshes).
   - CLI installs a `tracing-subscriber`; log level is controlled by `RUST_LOG`
     (e.g. `RUST_LOG=budbuk::cache=debug`).
+- **PostgreSQL FDW** (`crates/jira-fdw`): a `pgrx` + `supabase-wrappers` extension
+  that exposes Jira as foreign tables, so you can `SELECT` from Jira in `psql`.
+  - Forwards Postgres scan callbacks to the `JiraConnector` engine.
+  - Pushes `WHERE` / `ORDER BY` / `LIMIT` and column projection down to JQL.
+  - Excluded from the main Cargo workspace (built/run via `cargo pgrx`), keeping
+    the engine's `cargo build/test` and the 100%-coverage gate independent.
+  - Example setup SQL in `crates/jira-fdw/sql/example.sql`.
 - Project infrastructure: dual MIT/Apache-2.0 license, README and community docs,
   GitHub Actions CI (fmt, clippy, tests on stable + MSRV, 100% line-coverage gate,
   `cargo-deny`, docs), release workflow, Dependabot, and a `Makefile` of dev tasks.
