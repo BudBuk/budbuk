@@ -304,7 +304,8 @@ residual being error-propagation branches that don't fire on a successful run).
 - [ ] Metrics export (Prometheus / OpenTelemetry)
 - [ ] Persistent PostgreSQL-backed cache + incremental sync (shared across queries)
 - [ ] Secrets management (secure credential storage; OAuth flows)
-- [ ] More connectors: GitHub, Slack, Salesforce, Google Sheets, generic REST/DB
+- [ ] More connectors — see the prioritized [connector tracker](CONNECTORS.md)
+      (GitHub next, then a generic REST/OpenAPI connector, then Salesforce/Stripe)
 - [ ] Docker-based local development environment
 
 ## Contributing
