@@ -1,0 +1,34 @@
+[package]
+name = "jira-connector"
+description = "BudBuk connector for Jira Cloud: schema discovery, live REST fetching, pagination, caching, and JQL predicate pushdown."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+# Depend on our own framework crate by its path in the workspace.
+connector-sdk = { path = "../connector-sdk" }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+reqwest.workspace = true
+dotenvy.workspace = true
+
+# Test-only dependencies.
+[dev-dependencies]
+wiremock.workspace = true
+serial_test.workspace = true
+
+# This crate builds BOTH a library (src/lib.rs, reused later by the FDW) and a
+# runnable binary called `jira-cli` (src/main.rs).
+[[bin]]
+name = "jira-cli"
+path = "src/main.rs"

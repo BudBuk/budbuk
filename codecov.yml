@@ -1,0 +1,15 @@
+# Codecov configuration. The authoritative 100%-line gate is enforced in CI
+# directly from lcov (see .github/workflows/ci.yml); this mirrors it on Codecov.
+coverage:
+  status:
+    project:
+      default:
+        target: 100%
+        threshold: 0%
+    patch:
+      default:
+        target: 100%
+        threshold: 0%
+comment: false
+ignore:
+  - "**/main.rs" # thin binary entrypoint (logic lives in tested lib modules)

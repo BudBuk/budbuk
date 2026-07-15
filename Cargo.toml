@@ -1,0 +1,41 @@
+# The workspace root. It doesn't contain code itself — it lists the member
+# crates and shares dependency versions across them.
+[workspace]
+resolver = "2"
+members = [
+    "crates/connector-sdk",
+    "crates/jira-connector",
+]
+
+# Settings every member crate can inherit, so we set them in one place.
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+rust-version = "1.82.0"
+license = "MIT OR Apache-2.0"
+authors = ["The BudBuk Authors"]
+repository = "https://github.com/budbuk/budbuk"
+homepage = "https://github.com/budbuk/budbuk"
+keywords = ["postgresql", "fdw", "jira", "connector", "data-integration"]
+categories = ["database", "api-bindings"]
+
+# Shared dependency versions. Member crates opt in with `foo.workspace = true`.
+[workspace.dependencies]
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+anyhow = "1"
+dotenvy = "0.15"
+# Dev/test-only shared versions.
+wiremock = "0.6"
+serial_test = "3"
+
+# Release profile: optimize hard, strip symbols for lean binaries.
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true

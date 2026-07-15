@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a problem with BudBuk
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps (commands, SQL, config) that trigger the bug.
+      placeholder: |
+        1. Configure connector with ...
+        2. Run `cargo run -p jira-connector`
+        3. See error ...
+    validations:
+      required: true
+  - type: input
+    id: connector
+    attributes:
+      label: Connector
+      description: Which connector is affected (e.g. jira)?
+      placeholder: jira
+  - type: textarea
+    id: version
+    attributes:
+      label: Environment
+      description: Output of `rustc --version`, OS, and BudBuk version/commit.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant logs. Redact any secrets (tokens, emails).
+      render: shell

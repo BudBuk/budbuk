@@ -1,0 +1,4 @@
+# Formatting is enforced in CI via `cargo fmt --all -- --check`.
+# Only stable rustfmt options are used here so `cargo fmt` works on stable.
+edition = "2021"
+max_width = 100

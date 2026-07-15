@@ -1,0 +1,15 @@
+# Build output
+/target
+**/*.rs.bk
+
+# Coverage output
+/lcov.info
+
+# Secrets and local env (NEVER commit) — .env.example is the template
+.env
+
+# OS cruft
+.DS_Store
+
+# Note: Cargo.lock IS committed — this workspace ships a binary (jira-cli),
+# so a locked dependency set gives reproducible builds and CI.

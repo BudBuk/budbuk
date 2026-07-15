@@ -1,0 +1,256 @@
+<h1 align="center">BudBuk</h1>
+
+<p align="center">
+  <strong>A high-performance, PostgreSQL-native data integration platform in Rust.</strong><br>
+  Query Jira, GitHub, Slack, and other SaaS sources with plain SQL — fast, cached, and safe.
+</p>
+
+<p align="center">
+  <a href="https://github.com/budbuk/budbuk/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/budbuk/budbuk/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Coverage" src="https://img.shields.io/badge/coverage-100%25%20lines-brightgreen">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue">
+  <img alt="MSRV" src="https://img.shields.io/badge/rustc-1.82%2B-orange">
+</p>
+
+---
+
+> **Status: early proof of concept.** The connector engine (schema discovery, live
+> REST fetching, pagination, caching, and predicate pushdown) works today against a
+> real Jira Cloud instance. The PostgreSQL Foreign Data Wrapper (FDW) layer is on the
+> roadmap — see [Roadmap](#roadmap).
+
+## What is BudBuk?
+
+BudBuk lets you query external SaaS data **directly from PostgreSQL using standard
+SQL**, as if each data source were a set of local tables:
+
+```sql
+SELECT key, summary, status, assignee
+FROM jira_work.issues
+WHERE project = 'ENG' AND status = 'Open'
+ORDER BY created DESC
+LIMIT 50;
+```
+
+Under the hood, BudBuk translates that query into the source's own API (for Jira,
+into JQL), fetches only what's needed, caches it intelligently, and returns the rows
+to PostgreSQL. You get a familiar SQL interface over data that lives behind rate-limited
+web APIs — without writing a single line of glue code per query.
+
+## Why?
+
+- **One query language for everything.** Stop writing bespoke scripts per API. Join
+  your Jira issues against local tables in SQL.
+- **Fast by design.** Results are cached in memory (and, on the roadmap, in
+  PostgreSQL) with TTL and stale-while-revalidate, so repeat queries are served in
+  microseconds instead of hundreds of milliseconds.
+- **Safe by design.** Slow or failing external systems are isolated so they can't
+  degrade database stability. Written in Rust: memory-safe, concurrent, production-grade.
+- **Easy to extend.** A reusable connector SDK standardizes auth, HTTP, retries,
+  pagination, caching, and schema mapping. Adding a new source is mostly "implement
+  one trait."
+
+## Features
+
+| Area | What you get |
+|------|--------------|
+| **Schema discovery** | Each connector exposes typed tables (columns + PostgreSQL-ish types). |
+| **Live fetching** | Async HTTP (`reqwest` + `tokio`) with typed JSON parsing (`serde`). |
+| **Pagination** | Handles both token-based (`nextPageToken`) and offset-based (`startAt`) paging. |
+| **Caching** | In-memory TTL cache with **stale-while-revalidate** and a thundering-herd guard. |
+| **Predicate pushdown** | Translates `WHERE` / `ORDER BY` / `LIMIT` into the source's query language (JQL for Jira). |
+| **Multi-account** | One connector *type*, many *instances* (e.g. two Jira accounts), with isolated credentials and namespaced caches. |
+| **Error handling** | Typed errors; network/auth/parse failures are contained, not fatal. |
+| **100% line coverage** | Enforced in CI; see [Development](#development). |
+
+## Architecture
+
+BudBuk uses a **three-layer hybrid** design that combines the live feel of a real FDW,
+the isolation of a sidecar, and the speed of materialization:
+
+```
+        ┌────────────────────────────────────────────────────────┐
+        │  PostgreSQL   SELECT ... FROM jira_work.issues WHERE ... │
+        └───────────────────────────┬────────────────────────────┘
+                                     │  FDW callbacks (planned: pgrx)
+        ┌────────────────────────────▼───────────────────────────┐
+        │  FDW shim (thin)  — extracts quals/projection/sort/limit│   ← roadmap
+        └───────────────────────────┬────────────────────────────┘
+                                     │  scan request
+        ┌────────────────────────────▼───────────────────────────┐
+        │  Connector Engine (async Rust)                          │
+        │   • connector-sdk: Connector trait, neutral types       │
+        │   • cache: TTL + stale-while-revalidate (namespaced)    │
+        │   • jira-connector: HTTP client, JQL pushdown, paging   │
+        └───────────────────────────┬────────────────────────────┘
+                                     │  cache miss → async HTTP
+        ┌────────────────────────────▼───────────────────────────┐
+        │  External API (Jira Cloud REST, GitHub, Slack, …)       │
+        └─────────────────────────────────────────────────────────┘
+```
+
+The heavy work (fetching, caching, rate limiting) lives in a standalone async engine so
+a slow API call never blocks a PostgreSQL backend. The FDW shim (planned) stays thin.
+
+See [`docs/superpowers/specs/`](docs/superpowers/specs/) for the full design document.
+
+## Repository layout
+
+```
+budbuk/
+├── crates/
+│   ├── connector-sdk/     # Reusable framework: Connector trait, neutral types, cache
+│   │   └── src/
+│   │       ├── connector.rs   # the Connector trait (implement once per source)
+│   │       ├── types.rs        # Value, Row, Column, TableSchema, Query, Filter, ...
+│   │       ├── error.rs        # ConnectorError + Result
+│   │       └── cache.rs        # Cache + CachedConnector (TTL + SWR decorator)
+│   └── jira-connector/    # The Jira connector + demo CLI
+│       └── src/
+│           ├── lib.rs          # JiraConnector (implements Connector)
+│           ├── client.rs       # async Jira REST client + pagination
+│           ├── jql.rs          # WHERE/ORDER BY → JQL pushdown
+│           ├── mock.rs         # canned sample data (no credentials needed)
+│           ├── cli.rs          # CLI orchestration (tested)
+│           └── main.rs         # thin binary entrypoint
+├── docs/                  # design specs
+├── .github/workflows/     # CI + release
+└── Makefile               # dev tasks
+```
+
+## Quickstart
+
+### 1. Install Rust
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+### 2. Run against sample data (no credentials)
+
+```bash
+git clone https://github.com/budbuk/budbuk.git
+cd budbuk
+cargo run -p jira-connector
+```
+
+You'll see the four Jira tables (`projects`, `issues`, `users`, `worklogs`) printed
+from built-in mock data, plus a caching and a predicate-pushdown demo.
+
+### 3. Run against a real Jira account
+
+Create a `.env` file (it's git-ignored) from the template:
+
+```bash
+cp .env.example .env
+# then edit .env with your Jira Cloud URL, email, and API token
+```
+
+Get an API token at <https://id.atlassian.com/manage-profile/security/api-tokens>.
+
+```bash
+cargo run -p jira-connector
+```
+
+The CLI switches to **REAL** mode automatically when the three `JIRA_*` variables are set.
+
+## The Jira connector
+
+**Tables:** `projects`, `issues`, `users`, `worklogs`.
+
+**Predicate pushdown.** Filters on pushable columns are translated to JQL so Jira does
+the filtering server-side:
+
+| SQL-ish query | Generated JQL |
+|---------------|---------------|
+| *(no filter)* | `created >= -90d ORDER BY created DESC` |
+| `project = 'ENG'` | `project = "ENG" ORDER BY created DESC` |
+| `status = 'Open' AND assignee != 'bob'` | `status = "Open" AND assignee != "bob" ORDER BY created DESC` |
+
+Filters on columns Jira can't index are **not** dropped — they're reported back so the
+caller (the future FDW layer) re-applies them locally. This keeps results correct.
+
+**Caching.** Every result is cached under a key that includes the account, table, and
+full query shape (`https://work.atlassian.net:issues:f[projectEqENG]|s[created-]|p[*]|l[50]`),
+so different queries and different accounts never collide. A second identical query is
+served from memory — typically ~10,000× faster than the network round-trip.
+
+## Multi-account model
+
+One connector **type** (the code) supports many **instances** (accounts). This mirrors
+PostgreSQL's own separation of a foreign-data-wrapper from its foreign servers:
+
+```rust
+use jira_connector::{JiraConfig, JiraConnector};
+
+let work = JiraConnector::new(JiraConfig {
+    base_url: "https://work.atlassian.net".into(),
+    email: "you@work.com".into(),
+    api_token: work_token,
+    mock: false,
+});
+
+let side = JiraConnector::new(JiraConfig {
+    base_url: "https://side.atlassian.net".into(),
+    email: "you@side.com".into(),
+    api_token: side_token,
+    mock: false,
+});
+```
+
+Credentials, rate-limit state, and cache entries are isolated per account.
+
+## Development
+
+Common tasks are in the [`Makefile`](Makefile):
+
+```bash
+make build       # build the workspace
+make test        # run all tests
+make fmt         # format
+make lint        # clippy with warnings denied
+make cov         # coverage summary
+make cov-check   # fail if any line is uncovered (the 100% gate)
+make check       # everything CI runs
+```
+
+**Coverage policy.** BudBuk enforces **100% line coverage** in CI (measured with
+[`cargo-llvm-cov`](https://github.com/taiki-e/cargo-llvm-cov) and verified from the lcov
+report). The only file excluded is the thin binary entrypoint `main.rs`, whose logic is
+factored into the tested `cli` module. Sub-line region coverage sits at ~99% (the
+residual being error-propagation branches that don't fire on a successful run).
+
+## Roadmap
+
+- [x] Connector SDK: `Connector` trait, neutral types, typed errors
+- [x] Jira connector: live REST fetching for projects, issues, users, worklogs
+- [x] Pagination (token-based and offset-based)
+- [x] Caching: TTL + stale-while-revalidate + per-account namespacing
+- [x] Predicate pushdown (`WHERE` / `ORDER BY` / `LIMIT` → JQL)
+- [ ] Observability: structured logging + tracing + metrics
+- [ ] PostgreSQL FDW layer via [`pgrx`](https://github.com/pgcentralfoundation/pgrx)
+- [ ] Persistent PostgreSQL-backed cache + incremental sync
+- [ ] Secrets management (secure credential storage; OAuth flows)
+- [ ] More connectors: GitHub, Slack, Salesforce, Google Sheets, generic REST/DB
+- [ ] Docker-based local development environment
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our
+[Code of Conduct](CODE_OF_CONDUCT.md). All PRs must pass CI, including the 100%
+line-coverage gate.
+
+## Security
+
+Never commit credentials. To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+- MIT license ([LICENSE-MIT](LICENSE-MIT))
+
+at your option. Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.

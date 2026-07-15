@@ -1,0 +1,21 @@
+[package]
+name = "connector-sdk"
+description = "Reusable framework for building BudBuk data-source connectors: neutral types, the Connector trait, and a TTL/stale-while-revalidate cache."
+edition.workspace = true    # inherit "2021" from the workspace root
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# This crate's dependencies. `.workspace = true` pulls the version from the
+# workspace root so all crates stay in sync.
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true    # for spawning background cache-refresh tasks
