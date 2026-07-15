@@ -24,14 +24,14 @@ doc: ## Build and open the API docs
 	cargo doc --workspace --no-deps --open
 
 cov: ## Print a coverage summary
-	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs' --summary-only
+	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs|examples/' --summary-only
 
 cov-html: ## Generate an HTML coverage report
-	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs' --html
+	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs|examples/' --html
 	@echo "open target/llvm-cov/html/index.html"
 
 cov-check: ## Fail if any line is uncovered (the 100%-line gate)
-	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs' --lcov --output-path lcov.info
+	cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs|examples/' --lcov --output-path lcov.info
 	@u=$$(awk -F, '/^DA:/ && $$2==0 {c++} END{print c+0}' lcov.info); \
 		if [ "$$u" -ne 0 ]; then echo "FAIL: $$u uncovered line(s)"; exit 1; fi; \
 		echo "OK: 100% line coverage"

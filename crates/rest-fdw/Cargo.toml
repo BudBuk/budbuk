@@ -1,0 +1,42 @@
+[package]
+name = "rest_fdw"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "BudBuk generic REST Foreign Data Wrapper: expose any SourceSpec as PostgreSQL foreign tables via pgrx."
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "pgrx_embed_rest_fdw"
+path = "./src/bin/pgrx_embed.rs"
+
+[features]
+default = ["pg14"]
+pg13 = ["pgrx/pg13", "pgrx-tests/pg13", "supabase-wrappers/pg13"]
+pg14 = ["pgrx/pg14", "pgrx-tests/pg14", "supabase-wrappers/pg14"]
+pg15 = ["pgrx/pg15", "pgrx-tests/pg15", "supabase-wrappers/pg15"]
+pg16 = ["pgrx/pg16", "pgrx-tests/pg16", "supabase-wrappers/pg16"]
+pg17 = ["pgrx/pg17", "pgrx-tests/pg17", "supabase-wrappers/pg17"]
+pg_test = []
+
+[dependencies]
+pgrx = "=0.16.1"
+supabase-wrappers = { version = "=0.1.28", default-features = false }
+connector-sdk = { path = "../connector-sdk" }
+rest-connector = { path = "../rest-connector" }
+serde_json = "1"
+
+[dev-dependencies]
+pgrx-tests = "=0.16.1"
+
+[profile.dev]
+panic = "unwind"
+
+[profile.release]
+panic = "unwind"
+opt-level = 3
+lto = "fat"
+codegen-units = 1

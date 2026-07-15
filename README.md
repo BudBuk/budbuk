@@ -118,10 +118,16 @@ budbuk/
 │   │   └── src/
 │   │       ├── spec.rs         # SourceSpec: declarative API description
 │   │       ├── connector.rs    # RestConnector (auth, pagination, pushdown)
+│   │       ├── openapi.rs      # OpenAPI doc → SourceSpec importer
 │   │       └── cli.rs          # demo against JSONPlaceholder (no auth)
-│   └── jira-fdw/          # PostgreSQL FDW extension (pgrx; excluded from workspace)
-│       ├── src/lib.rs          # ForeignDataWrapper → JiraConnector shim
-│       └── sql/example.sql     # CREATE SERVER / FOREIGN TABLE example
+│   ├── github-connector/  # GitHub as a SourceSpec over the engine (no HTTP code)
+│   │   └── src/lib.rs          # github_spec(): repos, issues, gists, orgs
+│   ├── jira-fdw/          # PostgreSQL FDW for Jira (pgrx; excluded from workspace)
+│   │   ├── src/lib.rs          # ForeignDataWrapper → JiraConnector shim
+│   │   └── sql/example.sql     # CREATE SERVER / FOREIGN TABLE example
+│   └── rest-fdw/          # Generic PostgreSQL FDW: any SourceSpec → SQL (pgrx)
+│       ├── src/lib.rs          # ForeignDataWrapper → RestConnector from a spec
+│       └── sql/example.sql     # query GitHub from psql
 ├── docs/                  # design specs
 ├── .github/workflows/     # CI + release
 └── Makefile               # dev tasks
@@ -256,6 +262,32 @@ SELECT key, status FROM jira_issues WHERE project = 'ENG' LIMIT 5;
 > options (visible to superusers in the catalogs). A hardened deployment should source
 > secrets from a secrets manager. See [Roadmap](#roadmap).
 
+### Any connector in SQL — the generic REST FDW
+
+`crates/rest-fdw` is a *generic* FDW: its `spec` server option carries a serialized
+`SourceSpec`, so **any** connector — GitHub, an OpenAPI import, a hand-written spec —
+becomes SQL-queryable through one extension. For example, querying GitHub:
+
+```bash
+# generate the GitHub spec JSON, then paste it into the CREATE SERVER options
+cargo run -p github-connector --example print_spec
+```
+
+```sql
+CREATE SERVER github FOREIGN DATA WRAPPER rest_wrapper OPTIONS (spec '…SourceSpec JSON…');
+CREATE FOREIGN TABLE gh.repos (name text, stars bigint, forks bigint, language text)
+    SERVER github OPTIONS (object 'repos');
+
+SELECT name, stars FROM gh.repos ORDER BY stars DESC LIMIT 5;
+--  name        | stars
+-- -------------+-------
+--  Hello-World |  3701   ← live from GitHub, aggregated/sorted by Postgres
+```
+
+`WHERE` clauses on filterable columns (e.g. `issues WHERE state = 'open'`) are pushed
+down to the API; aggregates, `ORDER BY`, and other filters run in Postgres. Full
+example in [`crates/rest-fdw/sql/example.sql`](crates/rest-fdw/sql/example.sql).
+
 ## Observability
 
 BudBuk emits structured logs via the [`tracing`](https://docs.rs/tracing) crate. The
@@ -306,6 +338,8 @@ residual being error-propagation branches that don't fire on a successful run).
 - [x] Observability: structured logging + tracing + cache metrics
 - [x] PostgreSQL FDW layer via [`pgrx`](https://github.com/pgcentralfoundation/pgrx) —
       `SELECT` from Jira in `psql`, with predicate pushdown
+- [x] Generic REST FDW (`rest-fdw`) — drives any `SourceSpec` from a server option,
+      so GitHub / OpenAPI-imported / hand-written connectors are all SQL-queryable
 - [ ] Metrics export (Prometheus / OpenTelemetry)
 - [ ] Persistent PostgreSQL-backed cache + incremental sync (shared across queries)
 - [ ] Secrets management (secure credential storage; OAuth flows)
@@ -313,8 +347,10 @@ residual being error-propagation branches that don't fire on a successful run).
       declarative `SourceSpec`; auth, pagination, and predicate pushdown built in
 - [x] **OpenAPI → `SourceSpec` importer** — auto-generate a connector from an
       OpenAPI document (`SourceSpec::from_openapi`)
+- [x] **GitHub** connector (`github-connector`) — repos/issues/gists/orgs as a
+      `SourceSpec` over the engine, no bespoke HTTP code
 - [ ] More connectors — see the prioritized [connector tracker](CONNECTORS.md)
-      (GitHub next, then Salesforce/Stripe)
+      (Stripe next, then the GraphQL importer and generic SQL connector)
 - [ ] Docker-based local development environment
 
 ## Contributing

@@ -266,6 +266,27 @@ async fn api_key_query_is_applied() {
 }
 
 #[tokio::test]
+async fn requests_carry_a_default_user_agent() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(path("/items"))
+        .and(header_exists("user-agent"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!([{"id": 1}])))
+        .mount(&server)
+        .await;
+    let spec = source(
+        &server.uri(),
+        simple_table(Pagination::None),
+        AuthSpec::None,
+    );
+    let rows = RestConnector::new(spec)
+        .fetch("items", &Query::default())
+        .await
+        .unwrap();
+    assert_eq!(rows.len(), 1);
+}
+
+#[tokio::test]
 async fn unknown_table_errors() {
     let spec = source(
         "http://unused",

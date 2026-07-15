@@ -6,6 +6,7 @@ members = [
     "crates/connector-sdk",
     "crates/jira-connector",
     "crates/rest-connector",
+    "crates/github-connector",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be
 # built with plain `cargo build` (it needs a `pgXX` feature and links against
@@ -13,6 +14,7 @@ members = [
 # engine's `cargo build/test/llvm-cov` (and the 100%-coverage gate).
 exclude = [
     "crates/jira-fdw",
+    "crates/rest-fdw",
 ]
 
 # Settings every member crate can inherit, so we set them in one place.

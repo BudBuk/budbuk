@@ -1,0 +1,29 @@
+[package]
+name = "github-connector"
+description = "BudBuk connector for GitHub — a thin SourceSpec over the rest-connector engine (proves connectors are mostly config)."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+connector-sdk = { path = "../connector-sdk" }
+rest-connector = { path = "../rest-connector" }
+tokio.workspace = true
+anyhow.workspace = true
+dotenvy.workspace = true
+
+[dev-dependencies]
+wiremock.workspace = true
+serial_test.workspace = true
+async-trait.workspace = true
+serde_json.workspace = true
+
+[[bin]]
+name = "github-demo"
+path = "src/main.rs"

@@ -22,12 +22,14 @@ pub struct RestConnector {
 }
 
 impl RestConnector {
-    /// Build a connector from a spec.
+    /// Build a connector from a spec. The HTTP client sends a polite default
+    /// `User-Agent` (some APIs, e.g. GitHub, require one).
     pub fn new(spec: SourceSpec) -> Self {
-        Self {
-            spec,
-            http: reqwest::Client::new(),
-        }
+        let http = reqwest::Client::builder()
+            .user_agent(concat!("budbuk-rest-connector/", env!("CARGO_PKG_VERSION")))
+            .build()
+            .expect("failed to build HTTP client");
+        Self { spec, http }
     }
 
     /// GET one page and return the parsed JSON body.

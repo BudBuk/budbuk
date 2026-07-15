@@ -50,6 +50,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     generates a spec from an OpenAPI 3 document — collection `GET`s become tables,
     `$ref`s are resolved, response types map to columns, and query params become
     equality-pushdown filters. The demo imports a bundled spec and queries live.
+  - The REST client now sends a default `User-Agent` (required by some APIs).
+- **GitHub connector** (`crates/github-connector`): repos, issues, gists, and
+  orgs exposed as a ~90-line `SourceSpec` over the REST engine — no bespoke HTTP
+  code. Works unauthenticated against public data or with a personal access
+  token; `WHERE state = '...'` on issues pushes down to the API.
+- **Generic REST FDW** (`crates/rest-fdw`): a PostgreSQL extension (pgrx +
+  supabase-wrappers) driven by a `spec` server option (a serialized `SourceSpec`),
+  so any connector — GitHub, an OpenAPI import, a hand-written spec — is
+  SQL-queryable through one extension. Verified by querying GitHub live from
+  `psql` (repos/issues/gists) with pushdown, aggregates, and sorting. Excluded
+  from the main workspace (built via `cargo pgrx`). Example in
+  `crates/rest-fdw/sql/example.sql`.
 - Project infrastructure: dual MIT/Apache-2.0 license, README and community docs,
   GitHub Actions CI (fmt, clippy, tests on stable + MSRV, 100% line-coverage gate,
   `cargo-deny`, docs), release workflow, Dependabot, and a `Makefile` of dev tasks.

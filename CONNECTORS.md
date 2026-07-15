@@ -12,7 +12,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** 2 shipped — Jira, and the generic REST engine + OpenAPI importer.
+**Progress:** 3 shipped — Jira, the generic REST engine + OpenAPI importer, and GitHub.
 
 ## How connectors are prioritized
 
@@ -41,7 +41,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
-| 1 | 📋 | **GitHub** | Dev | OAuth2 / PAT | Closest to Jira (issues/PRs/repos); proves SDK reuse; REST+GraphQL |
+| 1 | ✅ | **GitHub** | Dev | PAT / public | `github-connector`: repos, issues, gists, orgs as a ~90-line `SourceSpec` over the REST engine — no HTTP code |
 | 2 | ⬜ | **Salesforce** | CRM | OAuth2 | #1 CRM; SOQL → clean pushdown |
 | 3 | ⬜ | **Google Sheets** | Productivity | OAuth2 | Universal; in the original spec |
 | 4 | ⬜ | **Stripe** | Payments | API key | Clean tabular API; huge base |

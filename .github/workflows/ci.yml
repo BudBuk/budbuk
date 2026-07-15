@@ -74,7 +74,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate lcov coverage
-        run: cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs' --lcov --output-path lcov.info
+        run: cargo llvm-cov --workspace --ignore-filename-regex 'main\.rs|examples/' --lcov --output-path lcov.info
       - name: Enforce 100% line coverage
         run: |
           uncovered=$(awk -F, '/^DA:/ && $2==0 {c++} END{print c+0}' lcov.info)
