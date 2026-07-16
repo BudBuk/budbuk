@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="BudBuk logo" width="132" height="132">
+</p>
+
 <h1 align="center">BudBuk</h1>
 
 <p align="center">
