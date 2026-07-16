@@ -28,6 +28,7 @@ use contentful_connector::{contentful_spec, ContentfulConfig};
 use datadog_connector::{datadog_spec, DatadogConfig};
 use docusign_connector::{docusign_spec, DocusignConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
+use gcalendar_connector::{gcalendar_spec, GcalendarConfig};
 use gdrive_connector::{gdrive_spec, GdriveConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
@@ -40,6 +41,7 @@ use klaviyo_connector::{klaviyo_spec, KlaviyoConfig};
 use lever_connector::{lever_spec, LeverConfig};
 use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
 use msgraph_connector::{msgraph_spec, MsGraphConfig};
+use notion_connector::{notion_spec, NotionConfig};
 use okta_connector::{okta_spec, OktaConfig};
 use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
@@ -125,6 +127,8 @@ pub fn list() -> &'static [&'static str] {
         "xero",
         "msgraph",
         "gdrive",
+        "gcalendar",
+        "notion",
         "openapi",
     ]
 }
@@ -435,6 +439,20 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
         "gdrive" => Ok(gdrive_spec(&GdriveConfig {
             base_url: get("base_url")
                 .unwrap_or("https://www.googleapis.com/drive/v3")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "gcalendar" => Ok(gcalendar_spec(&GcalendarConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://www.googleapis.com/calendar/v3")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "notion" => Ok(notion_spec(&NotionConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.notion.com/v1")
                 .to_string(),
             token: require("token")?.to_string(),
         })),
@@ -925,6 +943,26 @@ mod tests {
                 CatalogError::MissingOption { .. }
             ));
         }
+    }
+
+    #[test]
+    fn batch9_connectors_resolve_from_options() {
+        assert!(spec_for("gcalendar", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("calendars")
+            .is_some());
+        assert!(spec_for("notion", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("users")
+            .is_some());
+        assert!(matches!(
+            spec_for("gcalendar", &opts(&[])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+        assert!(matches!(
+            spec_for("notion", &opts(&[])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
     }
 
     #[test]

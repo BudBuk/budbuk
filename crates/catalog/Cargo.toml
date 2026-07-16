@@ -60,6 +60,8 @@ datadog-connector = { path = "../datadog-connector" }
 xero-connector = { path = "../xero-connector" }
 msgraph-connector = { path = "../msgraph-connector" }
 gdrive-connector = { path = "../gdrive-connector" }
+gcalendar-connector = { path = "../gcalendar-connector" }
+notion-connector = { path = "../notion-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

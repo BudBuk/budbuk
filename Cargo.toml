@@ -54,6 +54,8 @@ members = [
     "crates/xero-connector",
     "crates/msgraph-connector",
     "crates/gdrive-connector",
+    "crates/gcalendar-connector",
+    "crates/notion-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

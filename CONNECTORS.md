@@ -60,7 +60,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 7 | ⬜ | **Google Analytics 4** | Analytics | OAuth2 | Near-universal web analytics |
 | 8 | ✅ | **Zendesk** | Support | API token / OAuth2 | Clean, filterable API |
 | 9 | ✅ | **Shopify** | E-commerce | Access token / OAuth2 | E-commerce leader |
-| 10 | ⬜ | **Notion** | Docs/Knowledge | OAuth2 / integration token | Exploding adoption |
+| 10 | ✅ | **Notion** | Docs/Knowledge | OAuth2 / integration token | Exploding adoption |
 
 ## Tier 2 — very common, strong demand
 
@@ -150,7 +150,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 67 | ⬜ | **Google Search Console** | SEO | OAuth2 | Search performance |
 | 68 | ⬜ | **YouTube (Data/Analytics)** | Media | OAuth2 | Channel/video metrics |
 | 69 | ⬜ | **Twitter / X** | Social | OAuth2 | Social listening |
-| 70 | ⬜ | **Google Calendar** | Calendar | OAuth2 | Scheduling/meeting data |
+| 70 | ✅ | **Google Calendar** | Calendar | OAuth2 | Scheduling/meeting data |
 
 ## Tier 8 — data infra, enterprise CRM/HR
 

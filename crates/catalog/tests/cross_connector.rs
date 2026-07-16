@@ -550,3 +550,39 @@ async fn batch8_connectors_span_the_catalog() {
     assert_eq!(dd_rows[0].0[0].to_display_string(), "55");
     assert_eq!(mg_rows[0].0[0].to_display_string(), "mu1");
 }
+
+#[tokio::test]
+async fn batch9_connectors_span_the_catalog() {
+    //   gcalendar — "/items" pointer, Bearer
+    //   notion    — "/results" pointer, multi-header (Bearer + Notion-Version)
+    let gc = MockServer::start().await;
+    mount(
+        &gc,
+        "/users/me/calendarList",
+        json!({"items": [{"id": "cal1", "summary": "Work", "timeZone": "UTC"}]}),
+    )
+    .await;
+    let nt = MockServer::start().await;
+    mount(
+        &nt,
+        "/users",
+        json!({"results": [{"id": "nu1", "name": "Ada", "type": "person"}]}),
+    )
+    .await;
+
+    let gc_rows = fetch(
+        "gcalendar",
+        &opts(&[("base_url", gc.uri().as_str()), ("token", "t")]),
+        "calendars",
+    )
+    .await;
+    let nt_rows = fetch(
+        "notion",
+        &opts(&[("base_url", nt.uri().as_str()), ("token", "t")]),
+        "users",
+    )
+    .await;
+
+    assert_eq!(gc_rows[0].0[0].to_display_string(), "cal1");
+    assert_eq!(nt_rows[0].0[0].to_display_string(), "nu1");
+}

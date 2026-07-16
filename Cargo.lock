@@ -163,6 +163,7 @@ dependencies = [
  "datadog-connector",
  "docusign-connector",
  "freshdesk-connector",
+ "gcalendar-connector",
  "gdrive-connector",
  "github-connector",
  "gitlab-connector",
@@ -175,6 +176,7 @@ dependencies = [
  "lever-connector",
  "mailchimp-connector",
  "msgraph-connector",
+ "notion-connector",
  "okta-connector",
  "opsgenie-connector",
  "pagerduty-connector",
@@ -491,6 +493,17 @@ dependencies = [
  "memchr",
  "pin-project-lite",
  "slab",
+]
+
+[[package]]
+name = "gcalendar-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -1027,6 +1040,17 @@ dependencies = [
 
 [[package]]
 name = "msgraph-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "notion-connector"
 version = "0.1.0"
 dependencies = [
  "connector-sdk",
