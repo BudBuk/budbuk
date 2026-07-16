@@ -184,6 +184,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "catalog"
+version = "0.1.0"
+dependencies = [
+ "github-connector",
+ "rest-connector",
+ "stripe-connector",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "cc"
 version = "1.2.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -614,6 +624,17 @@ dependencies = [
  "libc",
  "r-efi 6.0.0",
  "rand_core 0.10.1",
+]
+
+[[package]]
+name = "github-connector"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "connector-sdk",
+ "dotenvy",
+ "rest-connector",
+ "tokio",
 ]
 
 [[package]]
@@ -1688,6 +1709,7 @@ dependencies = [
 name = "rest_fdw"
 version = "0.1.0"
 dependencies = [
+ "catalog",
  "connector-sdk",
  "pgrx",
  "pgrx-tests",
@@ -2008,6 +2030,14 @@ dependencies = [
  "unicode-bidi",
  "unicode-normalization",
  "unicode-properties",
+]
+
+[[package]]
+name = "stripe-connector"
+version = "0.1.0"
+dependencies = [
+ "rest-connector",
+ "serde_json",
 ]
 
 [[package]]

@@ -65,6 +65,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   orgs exposed as a ~90-line `SourceSpec` over the REST engine — no bespoke HTTP
   code. Works unauthenticated against public data or with a personal access
   token; `WHERE state = '...'` on issues pushes down to the API.
+- **Out-of-the-box connectors via a catalog.** Standard connectors now mount with
+  just a name + credentials — like Jira, no spec to generate:
+  `CREATE SERVER stripe OPTIONS (connector 'stripe', api_key '…')`.
+  - `crates/stripe-connector`: bundles a `SourceSpec` (11 core tables, generated
+    from Stripe's official OpenAPI) so Stripe needs only an API key.
+  - `crates/catalog`: maps a connector name + options to a `SourceSpec`
+    (`stripe`, `github` built-in; `openapi` imports a supplied doc). Adding a
+    standard connector is "bundle a spec, add one match arm".
+  - `rest-fdw` reads a `connector` server option and asks the catalog; the raw
+    `spec` option remains for fully custom sources.
 - **Generic REST FDW** (`crates/rest-fdw`): a PostgreSQL extension (pgrx +
   supabase-wrappers) driven by a `spec` server option (a serialized `SourceSpec`),
   so any connector — GitHub, an OpenAPI import, a hand-written spec — is

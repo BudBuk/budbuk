@@ -1,0 +1,21 @@
+[package]
+name = "catalog"
+description = "BudBuk connector catalog: builds a SourceSpec for a named built-in connector (stripe, github, …) from server options, so standard connectors mount out-of-the-box."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rest-connector = { path = "../rest-connector" }
+github-connector = { path = "../github-connector" }
+stripe-connector = { path = "../stripe-connector" }
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

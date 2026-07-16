@@ -60,11 +60,18 @@ pub(crate) struct RestFdw {
 }
 
 impl ForeignDataWrapper<RestFdwError> for RestFdw {
-    /// Build the engine from the server's `spec` option (a serialized SourceSpec).
+    /// Build the engine from the server options. Either name a built-in
+    /// connector (`connector 'stripe'`, plus its credentials) and the catalog
+    /// supplies the bundled spec, or pass a raw serialized `SourceSpec` via
+    /// `spec` for a fully custom source.
     fn new(server: ForeignServer) -> RestFdwResult<Self> {
-        let spec_json = require_option("spec", &server.options)?;
-        let spec: SourceSpec =
-            serde_json::from_str(spec_json).map_err(|e| RestFdwError::Config(e.to_string()))?;
+        let spec: SourceSpec = if let Some(name) = server.options.get("connector") {
+            catalog::spec_for(name, &server.options)
+                .map_err(|e| RestFdwError::Config(e.to_string()))?
+        } else {
+            let spec_json = require_option("spec", &server.options)?;
+            serde_json::from_str(spec_json).map_err(|e| RestFdwError::Config(e.to_string()))?
+        };
         Ok(Self {
             connector: RestConnector::new(spec),
             schema_cols: Vec::new(),

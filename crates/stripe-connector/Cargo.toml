@@ -1,0 +1,16 @@
+[package]
+name = "stripe-connector"
+description = "BudBuk connector for Stripe — bundles a SourceSpec derived from Stripe's official OpenAPI, so Stripe mounts with just an API key."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rest-connector = { path = "../rest-connector" }
+serde_json.workspace = true

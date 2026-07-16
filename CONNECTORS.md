@@ -12,9 +12,15 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** Shipped — Jira, GitHub, the generic REST engine + OpenAPI importer
-(which imports Stripe's official 104-table spec directly, with cursor pagination),
-and a generic PostgreSQL REST FDW.
+**Progress:** Shipped — Jira, GitHub, and Stripe (all mount out-of-the-box in
+PostgreSQL with just credentials), the config-driven REST engine + OpenAPI importer,
+and a generic REST FDW with a **connector catalog** (`crates/catalog`).
+
+> **The model:** standard connectors are out-of-the-box — their `SourceSpec` is
+> bundled in the code and registered in the catalog, so they mount like Jira
+> (`OPTIONS (connector 'stripe', api_key '…')`), no spec required. Marking one ✅
+> below means "bundle its spec + add a catalog entry"; the engine, FDW, caching,
+> pushdown, and observability are already done.
 
 ## How connectors are prioritized
 

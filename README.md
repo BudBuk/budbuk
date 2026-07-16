@@ -262,31 +262,36 @@ SELECT key, status FROM jira_issues WHERE project = 'ENG' LIMIT 5;
 > options (visible to superusers in the catalogs). A hardened deployment should source
 > secrets from a secrets manager. See [Roadmap](#roadmap).
 
-### Any connector in SQL — the generic REST FDW
+### Any connector in SQL — one FDW, built-in connectors
 
-`crates/rest-fdw` is a *generic* FDW: its `spec` server option carries a serialized
-`SourceSpec`, so **any** connector — GitHub, an OpenAPI import, a hand-written spec —
-becomes SQL-queryable through one extension. For example, querying GitHub:
-
-```bash
-# generate the GitHub spec JSON, then paste it into the CREATE SERVER options
-cargo run -p github-connector --example print_spec
-```
+`crates/rest-fdw` is a single generic extension that serves every connector. Standard
+connectors are **out-of-the-box**: their specs are bundled in the code (a *catalog*), so
+you mount them with just a name + credentials — exactly like Jira, no spec to generate:
 
 ```sql
-CREATE SERVER github FOREIGN DATA WRAPPER rest_wrapper OPTIONS (spec '…SourceSpec JSON…');
-CREATE FOREIGN TABLE gh.repos (name text, stars bigint, forks bigint, language text)
-    SERVER github OPTIONS (object 'repos');
+CREATE EXTENSION rest_fdw;
+CREATE FOREIGN DATA WRAPPER budbuk HANDLER rest_fdw_handler VALIDATOR rest_fdw_validator;
 
-SELECT name, stars FROM gh.repos ORDER BY stars DESC LIMIT 5;
---  name        | stars
--- -------------+-------
---  Hello-World |  3701   ← live from GitHub, aggregated/sorted by Postgres
+-- Built-in connectors: pick a name, give only credentials/config
+CREATE SERVER stripe OPTIONS (connector 'stripe', api_key 'sk_live_…');
+CREATE SERVER gh     OPTIONS (connector 'github', owner 'acme', repo 'app', token 'ghp_…');
+
+-- The long tail: bring your own OpenAPI doc (or a raw SourceSpec)
+CREATE SERVER myapi  OPTIONS (connector 'openapi', spec '…openapi json…', token '…');
+
+CREATE FOREIGN TABLE stripe.charges (id text, amount bigint, status text, customer text)
+    SERVER stripe OPTIONS (object 'charges');
+SELECT sum(amount)/100.0 AS revenue FROM stripe.charges WHERE status = 'succeeded';
 ```
 
-`WHERE` clauses on filterable columns (e.g. `issues WHERE state = 'open'`) are pushed
-down to the API; aggregates, `ORDER BY`, and other filters run in Postgres. Full
-example in [`crates/rest-fdw/sql/example.sql`](crates/rest-fdw/sql/example.sql).
+`WHERE` clauses on filterable columns push down to the API; aggregates, `ORDER BY`, joins,
+and other filters run in Postgres. The connector **catalog** (`crates/catalog`) maps each
+name to a bundled `SourceSpec` — adding a standard connector is "bundle a spec, add one
+line".
+
+📖 **Full setup reference — every connector, plus multiple accounts (e.g. two Jira sites)
+and the isolation/security model — is in [docs/configuration.md](docs/configuration.md).**
+A runnable example is in [`crates/rest-fdw/sql/example.sql`](crates/rest-fdw/sql/example.sql).
 
 ## Observability
 

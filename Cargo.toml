@@ -7,6 +7,8 @@ members = [
     "crates/jira-connector",
     "crates/rest-connector",
     "crates/github-connector",
+    "crates/stripe-connector",
+    "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be
 # built with plain `cargo build` (it needs a `pgXX` feature and links against
