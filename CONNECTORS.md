@@ -12,10 +12,11 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** Shipped — Jira, GitHub, Stripe, **GitLab, Zendesk, PagerDuty,
-Freshdesk, and Contentful** (all mount out-of-the-box in PostgreSQL with just
-credentials), the config-driven REST engine + OpenAPI importer, and a generic
-REST FDW with a **connector catalog** (`crates/catalog`).
+**Progress:** Shipped — Jira, GitHub, Stripe, GitLab, Zendesk, PagerDuty,
+Freshdesk, Contentful, **Asana, Shopify, Intercom, Pipedrive, and Sentry** (13
+sources, all out-of-the-box via the catalog), the config-driven REST engine +
+OpenAPI importer, a **GraphQL** engine + generator + FDW, and generic REST/GraphQL
+FDWs with a **connector catalog** (`crates/catalog`).
 
 > **The model:** standard connectors are out-of-the-box — their `SourceSpec` is
 > bundled in the code and registered in the catalog, so they mount like Jira
@@ -58,7 +59,7 @@ REST FDW with a **connector catalog** (`crates/catalog`).
 | 6 | ⬜ | **HubSpot** | CRM/Marketing | OAuth2 / private-app token | Dominant mid-market |
 | 7 | ⬜ | **Google Analytics 4** | Analytics | OAuth2 | Near-universal web analytics |
 | 8 | ✅ | **Zendesk** | Support | API token / OAuth2 | Clean, filterable API |
-| 9 | ⬜ | **Shopify** | E-commerce | Access token / OAuth2 | E-commerce leader |
+| 9 | ✅ | **Shopify** | E-commerce | Access token / OAuth2 | E-commerce leader |
 | 10 | ⬜ | **Notion** | Docs/Knowledge | OAuth2 / integration token | Exploding adoption |
 
 ## Tier 2 — very common, strong demand
@@ -71,9 +72,9 @@ REST FDW with a **connector catalog** (`crates/catalog`).
 | 14 | ⬜ | **Google Ads** | Ads | OAuth2 + developer token | Core marketing analytics |
 | 15 | ⬜ | **Meta (Facebook/Instagram) Ads** | Ads | OAuth2 | Core marketing analytics |
 | 16 | ⬜ | **Airtable** | Productivity/DB | PAT / OAuth2 | Spreadsheet-DB |
-| 17 | ⬜ | **Intercom** | Support/Messaging | OAuth2 / token | Support + product data |
+| 17 | ✅ | **Intercom** | Support/Messaging | OAuth2 / token | Support + product data |
 | 18 | ⬜ | **QuickBooks Online** | Accounting | OAuth2 | Dominant SMB accounting |
-| 19 | ⬜ | **Asana** | Work mgmt | OAuth2 / PAT | Jira-adjacent |
+| 19 | ✅ | **Asana** | Work mgmt | OAuth2 / PAT | Jira-adjacent |
 | 20 | ⬜ | **Snowflake** | Data warehouse | key-pair / user-pass | Query the warehouse |
 
 ## Tier 3 — widespread, high analytics value
@@ -101,7 +102,7 @@ REST FDW with a **connector catalog** (`crates/catalog`).
 | 34 | ⬜ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
 | 35 | ✅ | **Freshdesk** | Support | API key | Zendesk alternative |
 | 36 | ⬜ | **Klaviyo** | E-comm marketing | API key / OAuth2 | Dominant Shopify-era email |
-| 37 | ⬜ | **Pipedrive** | CRM | API token / OAuth2 | Popular SMB CRM |
+| 37 | ✅ | **Pipedrive** | CRM | API token / OAuth2 | Popular SMB CRM |
 | 38 | ✅ | **PagerDuty** | Incident mgmt | API token | On-call/incidents |
 | 39 | ⬜ | **ServiceNow** | ITSM/Enterprise | Basic / OAuth2 | Enterprise workflows |
 | 40 | ⬜ | **NetSuite** | ERP | OAuth2 (token-based) | Mid-market/enterprise ERP |
@@ -125,7 +126,7 @@ REST FDW with a **connector catalog** (`crates/catalog`).
 
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
-| 51 | ⬜ | **Sentry** | Error tracking | auth token | Dev/observability |
+| 51 | ✅ | **Sentry** | Error tracking | auth token | Dev/observability |
 | 52 | ⬜ | **Bitbucket** | Dev | OAuth2 / app password | Atlassian repo host |
 | 53 | ⬜ | **Trello** | Work mgmt | API key + token | Atlassian boards |
 | 54 | ⬜ | **ClickUp** | Work mgmt | OAuth2 / API token | Growing PM tool |

@@ -20,6 +20,11 @@ zendesk-connector = { path = "../zendesk-connector" }
 pagerduty-connector = { path = "../pagerduty-connector" }
 freshdesk-connector = { path = "../freshdesk-connector" }
 contentful-connector = { path = "../contentful-connector" }
+asana-connector = { path = "../asana-connector" }
+shopify-connector = { path = "../shopify-connector" }
+intercom-connector = { path = "../intercom-connector" }
+pipedrive-connector = { path = "../pipedrive-connector" }
+sentry-connector = { path = "../sentry-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

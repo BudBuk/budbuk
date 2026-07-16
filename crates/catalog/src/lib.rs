@@ -15,12 +15,17 @@
 
 use std::collections::HashMap;
 
+use asana_connector::{asana_spec, AsanaConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
+use intercom_connector::{intercom_spec, IntercomConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
+use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
+use sentry_connector::{sentry_spec, SentryConfig};
+use shopify_connector::{shopify_spec, ShopifyConfig};
 use stripe_connector::stripe_spec;
 use zendesk_connector::{zendesk_spec, ZendeskConfig};
 
@@ -45,6 +50,11 @@ pub fn list() -> &'static [&'static str] {
         "pagerduty",
         "freshdesk",
         "contentful",
+        "asana",
+        "shopify",
+        "intercom",
+        "pipedrive",
+        "sentry",
         "openapi",
     ]
 }
@@ -97,6 +107,39 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
         "contentful" => Ok(contentful_spec(&ContentfulConfig {
             base_url: require("base_url")?.to_string(),
             access_token: require("access_token")?.to_string(),
+        })),
+
+        "asana" => Ok(asana_spec(&AsanaConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://app.asana.com/api/1.0")
+                .to_string(),
+            token: get("token").map(str::to_string),
+        })),
+
+        "shopify" => Ok(shopify_spec(&ShopifyConfig {
+            base_url: require("base_url")?.to_string(),
+            access_token: require("access_token")?.to_string(),
+        })),
+
+        "intercom" => Ok(intercom_spec(&IntercomConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.intercom.io")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "pipedrive" => Ok(pipedrive_spec(&PipedriveConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.pipedrive.com/v1")
+                .to_string(),
+            api_token: require("api_token")?.to_string(),
+        })),
+
+        "sentry" => Ok(sentry_spec(&SentryConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://sentry.io/api/0")
+                .to_string(),
+            token: require("token")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -200,6 +243,51 @@ mod tests {
         // A required option is enforced for these too.
         assert!(matches!(
             spec_for("zendesk", &opts(&[("email", "a@b.c")])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+    }
+
+    #[test]
+    fn batch1_connectors_resolve_from_options() {
+        // Asana defaults its base_url and token is optional.
+        let asana = spec_for("asana", &opts(&[])).unwrap();
+        assert_eq!(asana.name, "asana");
+        assert!(asana.table("projects").is_some());
+
+        let shopify = spec_for(
+            "shopify",
+            &opts(&[
+                ("base_url", "https://acme.myshopify.com/admin/api/2024-01"),
+                ("access_token", "t"),
+            ]),
+        )
+        .unwrap();
+        assert!(shopify.table("products").is_some());
+
+        let intercom = spec_for("intercom", &opts(&[("token", "t")])).unwrap();
+        assert!(intercom.table("contacts").is_some());
+
+        let pipedrive = spec_for("pipedrive", &opts(&[("api_token", "t")])).unwrap();
+        assert!(pipedrive.table("deals").is_some());
+
+        let sentry = spec_for("sentry", &opts(&[("token", "t")])).unwrap();
+        assert!(sentry.table("projects").is_some());
+
+        // Required options are enforced.
+        assert!(matches!(
+            spec_for("shopify", &opts(&[("access_token", "t")])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+        assert!(matches!(
+            spec_for("intercom", &opts(&[])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+        assert!(matches!(
+            spec_for("pipedrive", &opts(&[])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+        assert!(matches!(
+            spec_for("sentry", &opts(&[])).unwrap_err(),
             CatalogError::MissingOption { .. }
         ));
     }

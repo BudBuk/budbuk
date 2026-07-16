@@ -109,3 +109,62 @@ async fn queries_span_multiple_connectors_through_the_catalog() {
     assert!(sources.contains(&"pagerduty"));
     assert!(sources.contains(&"contentful"));
 }
+
+#[tokio::test]
+async fn batch1_connectors_span_the_catalog() {
+    // Three more connectors, three more shapes:
+    //   asana   — "/data" pointer, Bearer, no pagination
+    //   shopify — "/products" pointer, X-Shopify-Access-Token header
+    //   sentry  — bare array (RowPath::Root), Bearer
+    let asana = MockServer::start().await;
+    mount(
+        &asana,
+        "/projects",
+        json!({"data": [{"gid": "111", "name": "Launch", "archived": false}]}),
+    )
+    .await;
+
+    let shopify = MockServer::start().await;
+    mount(
+        &shopify,
+        "/products.json",
+        json!({"products": [{"id": 4242, "title": "Tee", "status": "active", "vendor": "Acme"}]}),
+    )
+    .await;
+
+    let sentry = MockServer::start().await;
+    mount(
+        &sentry,
+        "/projects/",
+        json!([{"id": "p9", "slug": "web", "name": "Web", "platform": "javascript"}]),
+    )
+    .await;
+
+    let asana_rows = fetch(
+        "asana",
+        &opts(&[("base_url", asana.uri().as_str()), ("token", "t")]),
+        "projects",
+    )
+    .await;
+    let shopify_rows = fetch(
+        "shopify",
+        &opts(&[("base_url", shopify.uri().as_str()), ("access_token", "t")]),
+        "products",
+    )
+    .await;
+    let sentry_rows = fetch(
+        "sentry",
+        &opts(&[("base_url", sentry.uri().as_str()), ("token", "t")]),
+        "projects",
+    )
+    .await;
+
+    let unified: Vec<(&str, String)> = vec![
+        ("asana", asana_rows[0].0[0].to_display_string()),
+        ("shopify", shopify_rows[0].0[0].to_display_string()),
+        ("sentry", sentry_rows[0].0[0].to_display_string()),
+    ];
+    assert_eq!(unified[0].1, "111"); // asana projects.gid
+    assert_eq!(unified[1].1, "4242"); // shopify products.id
+    assert_eq!(unified[2].1, "p9"); // sentry projects.id
+}
