@@ -7,6 +7,34 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (GraphQL)
+
+- **Config-driven GraphQL engine** (`crates/graphql-connector`): the GraphQL twin
+  of the REST engine. One engine (`GraphQlConnector`) drives *any* GraphQL API
+  from a declarative, serde-serializable `GraphQlSpec` — no per-source code.
+  - Each table carries a stored GraphQL document (with variables); the engine
+    POSTs `{query, variables}`, surfaces GraphQL `errors`, walks the response to
+    the list/connection, and maps nodes to neutral rows.
+  - Auth (bearer/basic/API-key header), **Relay cursor pagination** (`first`/
+    `after` + `pageInfo`) and plain lists, equality predicate pushdown
+    (column → GraphQL variable), and dotted-path field mapping — all from the spec.
+  - **Introspection generator** (`GraphQlSpec::from_introspection_json`): the
+    analog of the OpenAPI importer. Root `Query` fields returning a Relay
+    connection or a list of objects become tables; scalar node fields become
+    typed columns and nested objects become a single `Json` column (selected one
+    level deep); scalar field arguments become pushdown filter variables; an
+    `include` filter focuses generation.
+  - Demo CLI queries the public Countries API (`countries.trevorblades.com`) with
+    no credentials, using a spec generated from introspection — proving the
+    generator feeds the same engine end to end.
+- **Generic GraphQL FDW** (`crates/graphql-fdw`): a PostgreSQL extension (pgrx +
+  supabase-wrappers) driven by a `spec` server option (a serialized
+  `GraphQlSpec`), so any GraphQL source is SQL-queryable through one extension.
+  Uses the workspace's rustls-backed `reqwest`, so it shares the FDW segfault
+  fix. Verified live from `psql` against the Countries API (projection, sorting,
+  nested object as JSON, aggregates). Excluded from the main workspace (built via
+  `cargo pgrx`). Example in `crates/graphql-fdw/sql/example.sql`.
+
 ### Fixed
 
 - **Segfault when querying an FDW live from PostgreSQL.** HTTP clients used

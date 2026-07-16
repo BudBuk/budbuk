@@ -13,6 +13,7 @@ members = [
     "crates/pagerduty-connector",
     "crates/freshdesk-connector",
     "crates/contentful-connector",
+    "crates/graphql-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be
@@ -22,6 +23,7 @@ members = [
 exclude = [
     "crates/jira-fdw",
     "crates/rest-fdw",
+    "crates/graphql-fdw",
 ]
 
 # Settings every member crate can inherit, so we set them in one place.

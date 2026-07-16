@@ -1,0 +1,3 @@
+/target
+**/*.rs.bk
+tests/pg_regress/results
