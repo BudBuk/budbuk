@@ -160,8 +160,10 @@ dependencies = [
  "confluence-connector",
  "connector-sdk",
  "contentful-connector",
+ "datadog-connector",
  "docusign-connector",
  "freshdesk-connector",
+ "gdrive-connector",
  "github-connector",
  "gitlab-connector",
  "grafana-connector",
@@ -169,8 +171,10 @@ dependencies = [
  "hubspot-connector",
  "intercom-connector",
  "jsm-connector",
+ "klaviyo-connector",
  "lever-connector",
  "mailchimp-connector",
+ "msgraph-connector",
  "okta-connector",
  "opsgenie-connector",
  "pagerduty-connector",
@@ -194,6 +198,7 @@ dependencies = [
  "typeform-connector",
  "wiremock",
  "woocommerce-connector",
+ "xero-connector",
  "zendesk-connector",
  "zohocrm-connector",
  "zoom-connector",
@@ -284,6 +289,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b2a41393f66f16b0823bb79094d54ac5fbd34ab292ddafb9a0456ac9f87d201"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "datadog-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -475,6 +491,17 @@ dependencies = [
  "memchr",
  "pin-project-lite",
  "slab",
+]
+
+[[package]]
+name = "gdrive-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -895,6 +922,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "klaviyo-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -985,6 +1023,17 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "msgraph-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -2185,6 +2234,17 @@ name = "writeable"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4"
+
+[[package]]
+name = "xero-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "yoke"

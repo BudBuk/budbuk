@@ -25,8 +25,10 @@ use calendly_connector::{calendly_spec, CalendlyConfig};
 use chargebee_connector::{chargebee_spec, ChargebeeConfig};
 use confluence_connector::{confluence_spec, ConfluenceConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
+use datadog_connector::{datadog_spec, DatadogConfig};
 use docusign_connector::{docusign_spec, DocusignConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
+use gdrive_connector::{gdrive_spec, GdriveConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
 use grafana_connector::{grafana_spec, GrafanaConfig};
@@ -34,8 +36,10 @@ use greenhouse_connector::{greenhouse_spec, GreenhouseConfig};
 use hubspot_connector::{hubspot_spec, HubspotConfig};
 use intercom_connector::{intercom_spec, IntercomConfig};
 use jsm_connector::{jsm_spec, JsmConfig};
+use klaviyo_connector::{klaviyo_spec, KlaviyoConfig};
 use lever_connector::{lever_spec, LeverConfig};
 use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
+use msgraph_connector::{msgraph_spec, MsGraphConfig};
 use okta_connector::{okta_spec, OktaConfig};
 use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
@@ -55,6 +59,7 @@ use surveymonkey_connector::{surveymonkey_spec, SurveymonkeyConfig};
 use twilio_connector::{twilio_spec, TwilioConfig};
 use typeform_connector::{typeform_spec, TypeformConfig};
 use woocommerce_connector::{woocommerce_spec, WooCommerceConfig};
+use xero_connector::{xero_spec, XeroConfig};
 use zendesk_connector::{zendesk_spec, ZendeskConfig};
 use zohocrm_connector::{zohocrm_spec, ZohoCrmConfig};
 use zoom_connector::{zoom_spec, ZoomConfig};
@@ -115,6 +120,11 @@ pub fn list() -> &'static [&'static str] {
         "box",
         "jsm",
         "grafana",
+        "klaviyo",
+        "datadog",
+        "xero",
+        "msgraph",
+        "gdrive",
         "openapi",
     ]
 }
@@ -389,6 +399,43 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
 
         "grafana" => Ok(grafana_spec(&GrafanaConfig {
             base_url: require("base_url")?.to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "klaviyo" => Ok(klaviyo_spec(&KlaviyoConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://a.klaviyo.com/api")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "datadog" => Ok(datadog_spec(&DatadogConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.datadoghq.com/api")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+            app_key: require("app_key")?.to_string(),
+        })),
+
+        "xero" => Ok(xero_spec(&XeroConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.xero.com/api.xro/2.0")
+                .to_string(),
+            token: require("token")?.to_string(),
+            tenant_id: require("tenant_id")?.to_string(),
+        })),
+
+        "msgraph" => Ok(msgraph_spec(&MsGraphConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://graph.microsoft.com/v1.0")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "gdrive" => Ok(gdrive_spec(&GdriveConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://www.googleapis.com/drive/v3")
+                .to_string(),
             token: require("token")?.to_string(),
         })),
 
@@ -832,6 +879,46 @@ mod tests {
             ("box", opts(&[])),
             ("jsm", opts(&[("email", "a@b.c")])),
             ("grafana", opts(&[("token", "t")])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch8_connectors_resolve_from_options() {
+        assert!(spec_for("klaviyo", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("profiles")
+            .is_some());
+        assert!(
+            spec_for("datadog", &opts(&[("api_key", "k"), ("app_key", "a")]))
+                .unwrap()
+                .table("monitors")
+                .is_some()
+        );
+        assert!(
+            spec_for("xero", &opts(&[("token", "t"), ("tenant_id", "x")]))
+                .unwrap()
+                .table("Invoices")
+                .is_some()
+        );
+        assert!(spec_for("msgraph", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("users")
+            .is_some());
+        assert!(spec_for("gdrive", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("files")
+            .is_some());
+        for (name, o) in [
+            ("klaviyo", opts(&[])),
+            ("datadog", opts(&[("api_key", "k")])),
+            ("xero", opts(&[("token", "t")])),
+            ("msgraph", opts(&[])),
+            ("gdrive", opts(&[])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),

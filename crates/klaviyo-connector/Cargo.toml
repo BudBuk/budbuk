@@ -1,0 +1,21 @@
+[package]
+name = "klaviyo-connector"
+description = "BudBuk connector for Klaviyo — profiles, lists, campaigns (multi-header auth)."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rest-connector = { path = "../rest-connector" }
+connector-sdk = { path = "../connector-sdk" }
+
+[dev-dependencies]
+wiremock.workspace = true
+serde_json.workspace = true
+tokio.workspace = true

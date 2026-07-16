@@ -55,6 +55,11 @@ docusign-connector = { path = "../docusign-connector" }
 box-connector = { path = "../box-connector" }
 jsm-connector = { path = "../jsm-connector" }
 grafana-connector = { path = "../grafana-connector" }
+klaviyo-connector = { path = "../klaviyo-connector" }
+datadog-connector = { path = "../datadog-connector" }
+xero-connector = { path = "../xero-connector" }
+msgraph-connector = { path = "../msgraph-connector" }
+gdrive-connector = { path = "../gdrive-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

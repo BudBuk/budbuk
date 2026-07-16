@@ -86,9 +86,9 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 23 | ✅ | **Confluence** | Docs | API token (Atlassian) | Reuses Jira auth |
 | 24 | ✅ | **Mailchimp** | Email marketing | API key / OAuth2 | Ubiquitous SMB email |
 | 25 | ⬜ | **Linear** | Dev/Issues | API key / OAuth2 | Modern GraphQL |
-| 26 | ⬜ | **Xero** | Accounting | OAuth2 | QuickBooks alternative (intl.) |
+| 26 | ✅ | **Xero** | Accounting | OAuth2 | QuickBooks alternative (intl.) |
 | 27 | ⬜ | **Segment** | CDP | API token | Event/customer hub |
-| 28 | ⬜ | **Datadog** | Observability | API + app keys | Metrics/monitors/logs |
+| 28 | ✅ | **Datadog** | Observability | API + app keys | Metrics/monitors/logs |
 | 29 | ⬜ | **Monday.com** | Work mgmt | API token (GraphQL) | Very common PM |
 | 30 | ⬜ | **Amplitude** | Product analytics | API key + secret | Product analytics |
 
@@ -98,10 +98,10 @@ FDWs with a **connector catalog** (`crates/catalog`).
 |---|--------|-----------|----------|------|-------|
 | 31 | ⬜ | **Mixpanel** | Product analytics | service account / secret | Amplitude sibling |
 | 32 | ✅ | **PayPal** | Payments | OAuth2 | Stripe alternative |
-| 33 | ⬜ | **Microsoft Teams** | Comms | OAuth2 (Graph) | Enterprise Slack alt |
+| 33 | ✅ | **Microsoft Teams** | Comms | OAuth2 (Graph) | Enterprise Slack alt |
 | 34 | ✅ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
 | 35 | ✅ | **Freshdesk** | Support | API key | Zendesk alternative |
-| 36 | ⬜ | **Klaviyo** | E-comm marketing | API key / OAuth2 | Dominant Shopify-era email |
+| 36 | ✅ | **Klaviyo** | E-comm marketing | API key / OAuth2 | Dominant Shopify-era email |
 | 37 | ✅ | **Pipedrive** | CRM | API token / OAuth2 | Popular SMB CRM |
 | 38 | ✅ | **PagerDuty** | Incident mgmt | API token | On-call/incidents |
 | 39 | ✅ | **ServiceNow** | ITSM/Enterprise | Basic / OAuth2 | Enterprise workflows |
@@ -131,7 +131,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 53 | ⬜ | **Trello** | Work mgmt | API key + token | Atlassian boards |
 | 54 | ⬜ | **ClickUp** | Work mgmt | OAuth2 / API token | Growing PM tool |
 | 55 | ✅ | **Jira Service Management** | ITSM | API token (Atlassian) | Reuses Jira work |
-| 56 | ⬜ | **Google Drive** | Files | OAuth2 | Universal file store |
+| 56 | ✅ | **Google Drive** | Files | OAuth2 | Universal file store |
 | 57 | ⬜ | **Dropbox** | Files | OAuth2 | Common file store |
 | 58 | ✅ | **Box** | Files | OAuth2 / JWT | Enterprise file store |
 | 59 | ✅ | **Okta** | Identity | API token / OAuth2 | SSO/audit logs |

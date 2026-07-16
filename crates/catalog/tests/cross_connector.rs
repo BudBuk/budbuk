@@ -495,3 +495,58 @@ async fn batch7_connectors_span_the_catalog() {
     assert_eq!(bx_rows[0].0[0].to_display_string(), "u1");
     assert_eq!(gf_rows[0].0[0].to_display_string(), "3");
 }
+
+#[tokio::test]
+async fn batch8_connectors_span_the_catalog() {
+    //   klaviyo — "/data" pointer, nested attributes.*, multi-header auth
+    //   datadog — root array, multi-header auth
+    //   msgraph — "/value" pointer, Bearer
+    let kv = MockServer::start().await;
+    mount(
+        &kv,
+        "/profiles",
+        json!({"data": [{"id": "pr1", "attributes": {"email": "jane@x.com"}}]}),
+    )
+    .await;
+    let dd = MockServer::start().await;
+    mount(
+        &dd,
+        "/v1/monitor",
+        json!([{"id": 55, "name": "CPU", "type": "metric alert"}]),
+    )
+    .await;
+    let mg = MockServer::start().await;
+    mount(
+        &mg,
+        "/users",
+        json!({"value": [{"id": "mu1", "displayName": "Ada", "mail": "a@b.c"}]}),
+    )
+    .await;
+
+    let kv_rows = fetch(
+        "klaviyo",
+        &opts(&[("base_url", kv.uri().as_str()), ("api_key", "k")]),
+        "profiles",
+    )
+    .await;
+    let dd_rows = fetch(
+        "datadog",
+        &opts(&[
+            ("base_url", dd.uri().as_str()),
+            ("api_key", "k"),
+            ("app_key", "a"),
+        ]),
+        "monitors",
+    )
+    .await;
+    let mg_rows = fetch(
+        "msgraph",
+        &opts(&[("base_url", mg.uri().as_str()), ("token", "t")]),
+        "users",
+    )
+    .await;
+
+    assert_eq!(kv_rows[0].0[1].to_display_string(), "jane@x.com"); // nested attributes.email
+    assert_eq!(dd_rows[0].0[0].to_display_string(), "55");
+    assert_eq!(mg_rows[0].0[0].to_display_string(), "mu1");
+}
