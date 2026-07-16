@@ -98,6 +98,7 @@ notes, and the roadmap of what's next.
 | **50 connectors** | Bundled `SourceSpec`s mount out-of-the-box via a **catalog** — just a name + credentials. |
 | **REST + GraphQL** | One config-driven REST engine *and* a GraphQL engine; generate specs from OpenAPI or GraphQL introspection. |
 | **Schema discovery** | Each connector exposes typed tables (columns + PostgreSQL-ish types). |
+| **Zero-DDL mounting** | `IMPORT FOREIGN SCHEMA` auto-creates every foreign table from discovery — *optional*; hand-written `CREATE FOREIGN TABLE` still works, and `LIMIT TO`/`EXCEPT` scope it. |
 | **Live fetching** | Async HTTP (`reqwest` + **rustls**) with typed JSON parsing (`serde`). |
 | **Pagination** | Offset, page-number, cursor (Stripe-style), and Relay GraphQL connections. |
 | **Caching** | In-memory TTL cache with **stale-while-revalidate** and a thundering-herd guard. |
@@ -323,10 +324,12 @@ CREATE SERVER gh     OPTIONS (connector 'github', owner 'acme', repo 'app', toke
 -- The long tail: bring your own OpenAPI doc (or a raw SourceSpec)
 CREATE SERVER myapi  OPTIONS (connector 'openapi', spec '…openapi json…', token '…');
 
--- Zero-DDL: auto-create every table a connector exposes (no CREATE FOREIGN TABLE)
+-- Zero-DDL: auto-create every table a connector exposes (optional convenience)
 CREATE SCHEMA stripe;
 IMPORT FOREIGN SCHEMA stripe FROM SERVER stripe INTO stripe;   -- → stripe.charges, stripe.customers, …
 --   LIMIT TO (charges, customers)  /  EXCEPT (events)  to scope it
+-- Prefer explicit control? Hand-write `CREATE FOREIGN TABLE … SERVER stripe
+-- OPTIONS (object 'charges')` instead — both approaches work and can be mixed.
 
 SELECT sum(amount)/100.0 AS revenue FROM stripe.charges WHERE status = 'succeeded';
 ```
