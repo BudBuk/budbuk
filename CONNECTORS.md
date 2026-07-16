@@ -12,11 +12,7 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** Shipped — Jira, GitHub, Stripe, GitLab, Zendesk, PagerDuty,
-Freshdesk, Contentful, **Asana, Shopify, Intercom, Pipedrive, and Sentry** (13
-sources, all out-of-the-box via the catalog), the config-driven REST engine +
-OpenAPI importer, a **GraphQL** engine + generator + FDW, and generic REST/GraphQL
-FDWs with a **connector catalog** (`crates/catalog`).
+**Progress:** **50 queryable sources shipped** — Jira plus 49 catalog built-ins (GitHub, Stripe, GitLab, Zendesk, PagerDuty, Freshdesk, Contentful, Asana, Shopify, Intercom, Pipedrive, Sentry, HubSpot, Slack, Mailchimp, Zoom, ServiceNow, Okta, Auth0, Twilio, Typeform, Opsgenie, Smartsheet, Calendly, Bitbucket, Square, Recurly, Confluence, WooCommerce, BigCommerce, Zoho CRM, ActiveCampaign, SurveyMonkey, SendGrid, Greenhouse, Lever, Chargebee, PayPal, DocuSign, Box, Jira Service Management, Grafana, Klaviyo, Datadog, Xero, Microsoft Graph, Google Drive, Google Calendar, Notion). All mount out-of-the-box via the catalog. Plus the config-driven REST engine + OpenAPI importer, a GraphQL engine + generator + FDW, generic REST/GraphQL FDWs, and `AuthSpec::Headers` for multi-header APIs. 100% line coverage; 9 cross-connector end-to-end tests.
 
 > **The model:** standard connectors are out-of-the-box — their `SourceSpec` is
 > bundled in the code and registered in the catalog, so they mount like Jira
