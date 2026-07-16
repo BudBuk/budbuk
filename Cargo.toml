@@ -19,6 +19,11 @@ members = [
     "crates/intercom-connector",
     "crates/pipedrive-connector",
     "crates/sentry-connector",
+    "crates/hubspot-connector",
+    "crates/slack-connector",
+    "crates/mailchimp-connector",
+    "crates/zoom-connector",
+    "crates/servicenow-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

@@ -168,3 +168,62 @@ async fn batch1_connectors_span_the_catalog() {
     assert_eq!(unified[1].1, "4242"); // shopify products.id
     assert_eq!(unified[2].1, "p9"); // sentry projects.id
 }
+
+#[tokio::test]
+async fn batch2_connectors_span_the_catalog() {
+    //   hubspot    — "/results" pointer, Bearer
+    //   slack      — "/members" pointer, Bearer
+    //   servicenow — "/result" pointer, Basic, Offset pagination
+    let hs = MockServer::start().await;
+    mount(
+        &hs,
+        "/crm/v3/objects/contacts",
+        json!({"results": [{"id": "c1", "createdAt": "2026-01-01T00:00:00Z",
+                            "updatedAt": "2026-01-02T00:00:00Z", "archived": false}]}),
+    )
+    .await;
+
+    let sl = MockServer::start().await;
+    mount(
+        &sl,
+        "/users.list",
+        json!({"members": [{"id": "U1", "name": "bob", "real_name": "Bob"}]}),
+    )
+    .await;
+
+    let sn = MockServer::start().await;
+    mount(
+        &sn,
+        "/table/incident",
+        json!({"result": [{"sys_id": "s1", "number": "INC001",
+                           "short_description": "down", "state": "1"}]}),
+    )
+    .await;
+
+    let hs_rows = fetch(
+        "hubspot",
+        &opts(&[("base_url", hs.uri().as_str()), ("token", "t")]),
+        "contacts",
+    )
+    .await;
+    let sl_rows = fetch(
+        "slack",
+        &opts(&[("base_url", sl.uri().as_str()), ("token", "t")]),
+        "users",
+    )
+    .await;
+    let sn_rows = fetch(
+        "servicenow",
+        &opts(&[
+            ("base_url", sn.uri().as_str()),
+            ("username", "u"),
+            ("password", "p"),
+        ]),
+        "incident",
+    )
+    .await;
+
+    assert_eq!(hs_rows[0].0[0].to_display_string(), "c1");
+    assert_eq!(sl_rows[0].0[0].to_display_string(), "U1");
+    assert_eq!(sn_rows[0].0[0].to_display_string(), "s1");
+}

@@ -25,6 +25,11 @@ shopify-connector = { path = "../shopify-connector" }
 intercom-connector = { path = "../intercom-connector" }
 pipedrive-connector = { path = "../pipedrive-connector" }
 sentry-connector = { path = "../sentry-connector" }
+hubspot-connector = { path = "../hubspot-connector" }
+slack-connector = { path = "../slack-connector" }
+mailchimp-connector = { path = "../mailchimp-connector" }
+zoom-connector = { path = "../zoom-connector" }
+servicenow-connector = { path = "../servicenow-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

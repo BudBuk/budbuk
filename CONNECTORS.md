@@ -55,8 +55,8 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 2 | ⬜ | **Salesforce** | CRM | OAuth2 | #1 CRM; SOQL → clean pushdown |
 | 3 | ⬜ | **Google Sheets** | Productivity | OAuth2 | Universal; in the original spec |
 | 4 | ✅ | **Stripe** | Payments | API key (Bearer) | Imports directly from Stripe's official OpenAPI — 104 tables, cursor pagination auto-detected. No hand-written code; add a test key for live queries |
-| 5 | ⬜ | **Slack** | Comms | OAuth2 (bot) | Near-universal |
-| 6 | ⬜ | **HubSpot** | CRM/Marketing | OAuth2 / private-app token | Dominant mid-market |
+| 5 | ✅ | **Slack** | Comms | OAuth2 (bot) | Near-universal |
+| 6 | ✅ | **HubSpot** | CRM/Marketing | OAuth2 / private-app token | Dominant mid-market |
 | 7 | ⬜ | **Google Analytics 4** | Analytics | OAuth2 | Near-universal web analytics |
 | 8 | ✅ | **Zendesk** | Support | API token / OAuth2 | Clean, filterable API |
 | 9 | ✅ | **Shopify** | E-commerce | Access token / OAuth2 | E-commerce leader |
@@ -84,7 +84,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 21 | ⬜ | **BigQuery** | Warehouse | OAuth2 / service account | Snowflake sibling |
 | 22 | ⬜ | **Amazon S3 (+ CSV/Parquet)** | Storage/Files | AWS IAM keys | Universal file data |
 | 23 | ⬜ | **Confluence** | Docs | API token (Atlassian) | Reuses Jira auth |
-| 24 | ⬜ | **Mailchimp** | Email marketing | API key / OAuth2 | Ubiquitous SMB email |
+| 24 | ✅ | **Mailchimp** | Email marketing | API key / OAuth2 | Ubiquitous SMB email |
 | 25 | ⬜ | **Linear** | Dev/Issues | API key / OAuth2 | Modern GraphQL |
 | 26 | ⬜ | **Xero** | Accounting | OAuth2 | QuickBooks alternative (intl.) |
 | 27 | ⬜ | **Segment** | CDP | API token | Event/customer hub |
@@ -99,12 +99,12 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 31 | ⬜ | **Mixpanel** | Product analytics | service account / secret | Amplitude sibling |
 | 32 | ⬜ | **PayPal** | Payments | OAuth2 | Stripe alternative |
 | 33 | ⬜ | **Microsoft Teams** | Comms | OAuth2 (Graph) | Enterprise Slack alt |
-| 34 | ⬜ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
+| 34 | ✅ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
 | 35 | ✅ | **Freshdesk** | Support | API key | Zendesk alternative |
 | 36 | ⬜ | **Klaviyo** | E-comm marketing | API key / OAuth2 | Dominant Shopify-era email |
 | 37 | ✅ | **Pipedrive** | CRM | API token / OAuth2 | Popular SMB CRM |
 | 38 | ✅ | **PagerDuty** | Incident mgmt | API token | On-call/incidents |
-| 39 | ⬜ | **ServiceNow** | ITSM/Enterprise | Basic / OAuth2 | Enterprise workflows |
+| 39 | ✅ | **ServiceNow** | ITSM/Enterprise | Basic / OAuth2 | Enterprise workflows |
 | 40 | ⬜ | **NetSuite** | ERP | OAuth2 (token-based) | Mid-market/enterprise ERP |
 
 ## Tier 5 — commerce, billing, ads breadth

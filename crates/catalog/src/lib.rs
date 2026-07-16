@@ -20,14 +20,19 @@ use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
+use hubspot_connector::{hubspot_spec, HubspotConfig};
 use intercom_connector::{intercom_spec, IntercomConfig};
+use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
 use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
 use sentry_connector::{sentry_spec, SentryConfig};
+use servicenow_connector::{servicenow_spec, ServiceNowConfig};
 use shopify_connector::{shopify_spec, ShopifyConfig};
+use slack_connector::{slack_spec, SlackConfig};
 use stripe_connector::stripe_spec;
 use zendesk_connector::{zendesk_spec, ZendeskConfig};
+use zoom_connector::{zoom_spec, ZoomConfig};
 
 /// Something went wrong resolving a named connector.
 #[derive(Debug, thiserror::Error)]
@@ -55,6 +60,11 @@ pub fn list() -> &'static [&'static str] {
         "intercom",
         "pipedrive",
         "sentry",
+        "hubspot",
+        "slack",
+        "mailchimp",
+        "zoom",
+        "servicenow",
         "openapi",
     ]
 }
@@ -140,6 +150,38 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
                 .unwrap_or("https://sentry.io/api/0")
                 .to_string(),
             token: require("token")?.to_string(),
+        })),
+
+        "hubspot" => Ok(hubspot_spec(&HubspotConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.hubapi.com")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "slack" => Ok(slack_spec(&SlackConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://slack.com/api")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "mailchimp" => Ok(mailchimp_spec(&MailchimpConfig {
+            base_url: require("base_url")?.to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "zoom" => Ok(zoom_spec(&ZoomConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.zoom.us/v2")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "servicenow" => Ok(servicenow_spec(&ServiceNowConfig {
+            base_url: require("base_url")?.to_string(),
+            username: require("username")?.to_string(),
+            password: require("password")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -290,6 +332,54 @@ mod tests {
             spec_for("sentry", &opts(&[])).unwrap_err(),
             CatalogError::MissingOption { .. }
         ));
+    }
+
+    #[test]
+    fn batch2_connectors_resolve_from_options() {
+        let hs = spec_for("hubspot", &opts(&[("token", "t")])).unwrap();
+        assert_eq!(hs.name, "hubspot");
+        assert!(hs.table("contacts").is_some());
+
+        let sl = spec_for("slack", &opts(&[("token", "t")])).unwrap();
+        assert!(sl.table("users").is_some());
+
+        let mc = spec_for(
+            "mailchimp",
+            &opts(&[
+                ("base_url", "https://us1.api.mailchimp.com/3.0"),
+                ("api_key", "k"),
+            ]),
+        )
+        .unwrap();
+        assert!(mc.table("lists").is_some());
+
+        let zm = spec_for("zoom", &opts(&[("token", "t")])).unwrap();
+        assert!(zm.table("users").is_some());
+
+        let sn = spec_for(
+            "servicenow",
+            &opts(&[
+                ("base_url", "https://dev.service-now.com/api/now"),
+                ("username", "u"),
+                ("password", "p"),
+            ]),
+        )
+        .unwrap();
+        assert!(sn.table("incident").is_some());
+
+        // Required options enforced.
+        for (name, o) in [
+            ("hubspot", opts(&[])),
+            ("slack", opts(&[])),
+            ("mailchimp", opts(&[("api_key", "k")])),
+            ("zoom", opts(&[])),
+            ("servicenow", opts(&[("username", "u"), ("password", "p")])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
     }
 
     #[test]
