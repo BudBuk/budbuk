@@ -134,6 +134,7 @@ pub fn options_for(name: &str) -> Vec<OptionSpec> {
         "gcalendar" => vec![spec("token", true), spec("base_url", false)],
         "notion" => vec![spec("token", true), spec("base_url", false)],
         "huggingface" => vec![spec("token", true), spec("base_url", false)],
+        "granola" => vec![spec("api_key", true), spec("base_url", false)],
         "openapi" => vec![
             spec("spec", true),
             spec("token", false),

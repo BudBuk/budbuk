@@ -58,6 +58,7 @@ members = [
     "crates/notion-connector",
     "crates/huggingface-connector",
     "crates/monday-connector",
+    "crates/granola-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

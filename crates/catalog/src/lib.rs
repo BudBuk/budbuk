@@ -36,6 +36,7 @@ use gdrive_connector::{gdrive_spec, GdriveConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
 use grafana_connector::{grafana_spec, GrafanaConfig};
+use granola_connector::{granola_spec, GranolaConfig};
 use greenhouse_connector::{greenhouse_spec, GreenhouseConfig};
 use hubspot_connector::{hubspot_spec, HubspotConfig};
 use huggingface_connector::{huggingface_spec, HuggingFaceConfig};
@@ -134,6 +135,7 @@ pub fn list() -> &'static [&'static str] {
         "gcalendar",
         "notion",
         "huggingface",
+        "granola",
         "openapi",
     ]
 }
@@ -467,6 +469,13 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
                 .unwrap_or("https://huggingface.co")
                 .to_string(),
             token: require("token")?.to_string(),
+        })),
+
+        "granola" => Ok(granola_spec(&GranolaConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://public-api.granola.ai/v1")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -973,6 +982,17 @@ mod tests {
         ));
         assert!(matches!(
             spec_for("notion", &opts(&[])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
+    }
+
+    #[test]
+    fn granola_resolves() {
+        let spec = spec_for("granola", &opts(&[("api_key", "grn_x")])).unwrap();
+        assert_eq!(spec.name, "granola");
+        assert!(spec.table("notes").is_some());
+        assert!(matches!(
+            spec_for("granola", &opts(&[])).unwrap_err(),
             CatalogError::MissingOption { .. }
         ));
     }
