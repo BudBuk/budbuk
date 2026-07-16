@@ -28,14 +28,9 @@ pub fn twilio_spec(cfg: &TwilioConfig) -> SourceSpec {
         field: field.to_string(),
         data_type,
     };
-    // Twilio paginates with ?Page=N&PageSize=M (0-based).
-    let page = || Pagination::Page {
-        page_param: "Page".to_string(),
-        size_param: "PageSize".to_string(),
-        page_size: 50,
-        start_page: 0,
-    };
-
+    // Twilio deprecated numbered paging (?Page=N now returns HTTP 400 error
+    // 20001 — it requires cursor paging via AfterSid). Fetch a single page,
+    // which is all the shared engine's pagination models support here.
     SourceSpec {
         name: "twilio".to_string(),
         base_url: cfg.base_url.clone(),
@@ -57,7 +52,7 @@ pub fn twilio_spec(cfg: &TwilioConfig) -> SourceSpec {
                     col("from", "from", DataType::Text),
                     col("body", "body", DataType::Text),
                 ],
-                pagination: page(),
+                pagination: Pagination::None,
                 filters: vec![],
             },
             TableSpec {
@@ -72,7 +67,7 @@ pub fn twilio_spec(cfg: &TwilioConfig) -> SourceSpec {
                     col("to", "to", DataType::Text),
                     col("from", "from", DataType::Text),
                 ],
-                pagination: page(),
+                pagination: Pagination::None,
                 filters: vec![],
             },
         ],
@@ -111,14 +106,7 @@ mod tests {
             &messages.row_path,
             RowPath::Pointer { pointer } if pointer == "/messages"
         ));
-        assert!(matches!(
-            messages.pagination,
-            Pagination::Page {
-                page_size: 50,
-                start_page: 0,
-                ..
-            }
-        ));
+        assert!(matches!(messages.pagination, Pagination::None));
 
         let calls = spec.table("calls").unwrap();
         assert_eq!(calls.path, "/Calls.json");
