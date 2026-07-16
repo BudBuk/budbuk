@@ -34,6 +34,11 @@ members = [
     "crates/bitbucket-connector",
     "crates/square-connector",
     "crates/recurly-connector",
+    "crates/confluence-connector",
+    "crates/woocommerce-connector",
+    "crates/bigcommerce-connector",
+    "crates/zohocrm-connector",
+    "crates/activecampaign-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

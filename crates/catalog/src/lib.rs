@@ -15,10 +15,13 @@
 
 use std::collections::HashMap;
 
+use activecampaign_connector::{activecampaign_spec, ActiveCampaignConfig};
 use asana_connector::{asana_spec, AsanaConfig};
 use auth0_connector::{auth0_spec, Auth0Config};
+use bigcommerce_connector::{bigcommerce_spec, BigCommerceConfig};
 use bitbucket_connector::{bitbucket_spec, BitbucketConfig};
 use calendly_connector::{calendly_spec, CalendlyConfig};
+use confluence_connector::{confluence_spec, ConfluenceConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
@@ -41,7 +44,9 @@ use square_connector::{square_spec, SquareConfig};
 use stripe_connector::stripe_spec;
 use twilio_connector::{twilio_spec, TwilioConfig};
 use typeform_connector::{typeform_spec, TypeformConfig};
+use woocommerce_connector::{woocommerce_spec, WooCommerceConfig};
 use zendesk_connector::{zendesk_spec, ZendeskConfig};
+use zohocrm_connector::{zohocrm_spec, ZohoCrmConfig};
 use zoom_connector::{zoom_spec, ZoomConfig};
 
 /// Something went wrong resolving a named connector.
@@ -85,6 +90,11 @@ pub fn list() -> &'static [&'static str] {
         "bitbucket",
         "square",
         "recurly",
+        "confluence",
+        "woocommerce",
+        "bigcommerce",
+        "zohocrm",
+        "activecampaign",
         "openapi",
     ]
 }
@@ -268,6 +278,35 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
                 .unwrap_or("https://v3.recurly.com")
                 .to_string(),
             api_key: require("api_key")?.to_string(),
+        })),
+
+        "confluence" => Ok(confluence_spec(&ConfluenceConfig {
+            base_url: require("base_url")?.to_string(),
+            email: require("email")?.to_string(),
+            api_token: require("api_token")?.to_string(),
+        })),
+
+        "woocommerce" => Ok(woocommerce_spec(&WooCommerceConfig {
+            base_url: require("base_url")?.to_string(),
+            consumer_key: require("consumer_key")?.to_string(),
+            consumer_secret: require("consumer_secret")?.to_string(),
+        })),
+
+        "bigcommerce" => Ok(bigcommerce_spec(&BigCommerceConfig {
+            base_url: require("base_url")?.to_string(),
+            access_token: require("access_token")?.to_string(),
+        })),
+
+        "zohocrm" => Ok(zohocrm_spec(&ZohoCrmConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://www.zohoapis.com/crm/v3")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "activecampaign" => Ok(activecampaign_spec(&ActiveCampaignConfig {
+            base_url: require("base_url")?.to_string(),
+            api_token: require("api_token")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -551,6 +590,71 @@ mod tests {
             ("bitbucket", opts(&[("username", "u")])),
             ("square", opts(&[])),
             ("recurly", opts(&[])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch5_connectors_resolve_from_options() {
+        assert!(spec_for(
+            "confluence",
+            &opts(&[
+                ("base_url", "https://x.atlassian.net/wiki/rest/api"),
+                ("email", "a@b.c"),
+                ("api_token", "t")
+            ])
+        )
+        .unwrap()
+        .table("content")
+        .is_some());
+        assert!(spec_for(
+            "woocommerce",
+            &opts(&[
+                ("base_url", "https://shop/wp-json/wc/v3"),
+                ("consumer_key", "ck"),
+                ("consumer_secret", "cs")
+            ])
+        )
+        .unwrap()
+        .table("products")
+        .is_some());
+        assert!(spec_for(
+            "bigcommerce",
+            &opts(&[
+                ("base_url", "https://api.bigcommerce.com/stores/x/v3"),
+                ("access_token", "t")
+            ])
+        )
+        .unwrap()
+        .table("products")
+        .is_some());
+        assert!(spec_for("zohocrm", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("Leads")
+            .is_some());
+        assert!(spec_for(
+            "activecampaign",
+            &opts(&[
+                ("base_url", "https://x.api-us1.com/api/3"),
+                ("api_token", "t")
+            ])
+        )
+        .unwrap()
+        .table("contacts")
+        .is_some());
+        for (name, o) in [
+            (
+                "confluence",
+                opts(&[("email", "a@b.c"), ("api_token", "t")]),
+            ),
+            ("woocommerce", opts(&[("consumer_key", "ck")])),
+            ("bigcommerce", opts(&[])),
+            ("zohocrm", opts(&[])),
+            ("activecampaign", opts(&[])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),

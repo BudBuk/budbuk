@@ -83,7 +83,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 |---|--------|-----------|----------|------|-------|
 | 21 | ⬜ | **BigQuery** | Warehouse | OAuth2 / service account | Snowflake sibling |
 | 22 | ⬜ | **Amazon S3 (+ CSV/Parquet)** | Storage/Files | AWS IAM keys | Universal file data |
-| 23 | ⬜ | **Confluence** | Docs | API token (Atlassian) | Reuses Jira auth |
+| 23 | ✅ | **Confluence** | Docs | API token (Atlassian) | Reuses Jira auth |
 | 24 | ✅ | **Mailchimp** | Email marketing | API key / OAuth2 | Ubiquitous SMB email |
 | 25 | ⬜ | **Linear** | Dev/Issues | API key / OAuth2 | Modern GraphQL |
 | 26 | ⬜ | **Xero** | Accounting | OAuth2 | QuickBooks alternative (intl.) |
@@ -111,8 +111,8 @@ FDWs with a **connector catalog** (`crates/catalog`).
 
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
-| 41 | ⬜ | **WooCommerce** | E-commerce | API key/secret | WordPress commerce |
-| 42 | ⬜ | **BigCommerce** | E-commerce | API token | Shopify alternative |
+| 41 | ✅ | **WooCommerce** | E-commerce | API key/secret | WordPress commerce |
+| 42 | ✅ | **BigCommerce** | E-commerce | API token | Shopify alternative |
 | 43 | ⬜ | **Amazon Selling Partner (SP-API)** | E-commerce | LWA OAuth2 + AWS | Marketplace sellers |
 | 44 | ✅ | **Square** | Payments/POS | OAuth2 / token | SMB payments |
 | 45 | ⬜ | **Chargebee** | Subscription billing | API key | SaaS revenue |
@@ -120,7 +120,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 47 | ⬜ | **LinkedIn Ads** | Ads | OAuth2 | B2B marketing |
 | 48 | ⬜ | **TikTok Ads** | Ads | OAuth2 | Fast-growing |
 | 49 | ⬜ | **Microsoft/Bing Ads** | Ads | OAuth2 + developer token | Search ads #2 |
-| 50 | ⬜ | **Zoho CRM** | CRM | OAuth2 | Large SMB base |
+| 50 | ✅ | **Zoho CRM** | CRM | OAuth2 | Large SMB base |
 
 ## Tier 6 — dev, files, identity
 
@@ -143,7 +143,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 |---|--------|-----------|----------|------|-------|
 | 61 | ⬜ | **Marketo** | Marketing automation | OAuth2 (REST) | Enterprise MA |
 | 62 | ⬜ | **Salesforce Pardot** | Marketing automation | OAuth2 | B2B MA |
-| 63 | ⬜ | **ActiveCampaign** | Marketing/CRM | API key | SMB MA |
+| 63 | ✅ | **ActiveCampaign** | Marketing/CRM | API key | SMB MA |
 | 64 | ⬜ | **SendGrid** | Email delivery | API key | Transactional email |
 | 65 | ✅ | **Typeform** | Forms | OAuth2 / PAT | Survey/lead data |
 | 66 | ⬜ | **SurveyMonkey** | Surveys | OAuth2 | Survey data |

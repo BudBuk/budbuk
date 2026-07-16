@@ -40,6 +40,11 @@ calendly-connector = { path = "../calendly-connector" }
 bitbucket-connector = { path = "../bitbucket-connector" }
 square-connector = { path = "../square-connector" }
 recurly-connector = { path = "../recurly-connector" }
+confluence-connector = { path = "../confluence-connector" }
+woocommerce-connector = { path = "../woocommerce-connector" }
+bigcommerce-connector = { path = "../bigcommerce-connector" }
+zohocrm-connector = { path = "../zohocrm-connector" }
+activecampaign-connector = { path = "../activecampaign-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

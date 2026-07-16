@@ -334,3 +334,62 @@ async fn batch4_connectors_span_the_catalog() {
     assert_eq!(bb_rows[0].0[0].to_display_string(), "{r1}");
     assert_eq!(rc_rows[0].0[0].to_display_string(), "a1");
 }
+
+#[tokio::test]
+async fn batch5_connectors_span_the_catalog() {
+    //   confluence  — "/results" pointer, Basic, Offset
+    //   woocommerce — root array, Basic, Page
+    //   zohocrm     — "/data" pointer, Zoho-oauthtoken header, Page
+    let cf = MockServer::start().await;
+    mount(
+        &cf,
+        "/content",
+        json!({"results": [{"id": "c1", "type": "page", "title": "Home", "status": "current"}]}),
+    )
+    .await;
+    let wc = MockServer::start().await;
+    mount(
+        &wc,
+        "/products",
+        json!([{"id": 7, "name": "Hat", "status": "publish", "price": "9.99"}]),
+    )
+    .await;
+    let zc = MockServer::start().await;
+    mount(
+        &zc,
+        "/Leads",
+        json!({"data": [{"id": "L1", "Email": "a@b.c", "Company": "Acme"}]}),
+    )
+    .await;
+
+    let cf_rows = fetch(
+        "confluence",
+        &opts(&[
+            ("base_url", cf.uri().as_str()),
+            ("email", "a@b.c"),
+            ("api_token", "t"),
+        ]),
+        "content",
+    )
+    .await;
+    let wc_rows = fetch(
+        "woocommerce",
+        &opts(&[
+            ("base_url", wc.uri().as_str()),
+            ("consumer_key", "ck"),
+            ("consumer_secret", "cs"),
+        ]),
+        "products",
+    )
+    .await;
+    let zc_rows = fetch(
+        "zohocrm",
+        &opts(&[("base_url", zc.uri().as_str()), ("token", "t")]),
+        "Leads",
+    )
+    .await;
+
+    assert_eq!(cf_rows[0].0[0].to_display_string(), "c1");
+    assert_eq!(wc_rows[0].0[0].to_display_string(), "7");
+    assert_eq!(zc_rows[0].0[0].to_display_string(), "L1");
+}
