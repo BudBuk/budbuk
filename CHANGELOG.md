@@ -7,6 +7,45 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added (Control panel)
+
+- **Control panel** (`control-panel/`) — a React + Vite single-page app served by an
+  Axum control-plane, turning "mount a source and keep its data fresh" into a
+  point-and-click flow.
+  - **Catalog browser** — all 53 connectors in a searchable, category-filtered card
+    grid with bundled brand icons (offline `simple-icons` + monogram fallback).
+  - **Spec-driven mount form** — renders each connector's real required/optional
+    fields from the catalog, masking secrets.
+  - **Credential encryption at rest** — secret fields sealed with **AES-256-GCM**
+    (key from `BUDBUK_SECRET_KEY`, or random per-process) before storage.
+  - **Credential validation on save** — the server builds the connector, runs
+    `discover()`, and does a one-row probe fetch against the live API, so bad
+    credentials are rejected up front with a clear error.
+  - **Background sync into shadow tables** — a tokio scheduler materializes each
+    mounted table into `shadow."<source>__<table>"` (full refresh, capped at 1000
+    rows); "sync now" forces a refresh. Sync calls the engine directly, so it does
+    **not** require the FDW; GraphQL sources (e.g. Monday.com) are supported.
+  - **Analytics view** and **client-side routing** (`/catalog`, `/sources`,
+    `/analytics`) with deep-linkable, refresh-safe URLs (SPA fallback returns
+    `index.html` at a genuine 200; real assets keep their content-type).
+  - JSON API: `/api/connectors`, `/api/sources` (+ `POST` to mount), per-source
+    sync toggle / refresh, and shadow-table data preview.
+  - Verified live end-to-end against Asana, Freshdesk, Hugging Face (1000 rows),
+    Twilio, and Monday.com (GraphQL).
+
+### Added (Connectors)
+
+- **Catalog grown to 53 out-of-the-box connectors.** Beyond the initial set, the
+  bundled catalog now covers dev/ITSM/CRM/payments/e-commerce/comms/docs/identity/
+  observability/HR sources — each a declarative `SourceSpec` over the shared engine,
+  at 100% line coverage.
+- **Hugging Face** (`huggingface-connector`) — models, datasets, spaces (Bearer).
+- **Monday.com** (`monday-connector`) — boards, users, workspaces over the GraphQL
+  engine; the first catalog GraphQL source, wired through the control plane.
+- **Granola** (`granola-connector`) — meeting notes over the public API (Bearer).
+- **Twilio** paging fix — Twilio deprecated numbered paging (HTTP 400, error 20001);
+  switched `messages`/`calls` to single-page fetch.
+
 ### Added
 
 - **`IMPORT FOREIGN SCHEMA`** — zero-DDL mounting. `IMPORT FOREIGN SCHEMA x FROM

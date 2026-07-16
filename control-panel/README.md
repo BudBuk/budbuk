@@ -14,9 +14,8 @@ control-panel/
 
 ## What it does
 
-- **Browse** all 50 built-in connectors.
-- **Browse** connectors in a searchable, category-filtered card grid (icons,
-  category badges, descriptions).
+- **Browse** all 53 built-in connectors in a searchable, category-filtered card
+  grid (brand icons, category badges, descriptions).
 - **Mount** a source: the form renders the connector's real fields (from the
   catalog), masking secrets. On submit the server **validates the credentials**
   by probing the API (a 1-row fetch), so bad creds are caught up front. Secret
@@ -26,9 +25,10 @@ control-panel/
   in PostgreSQL, and re-syncs on schedule. "Sync now" forces a refresh.
 - **Preview** the materialized rows.
 
-The server calls the engine directly (`catalog::spec_for` → `RestConnector` →
-`discover`/`fetch`), so **sync does not require the FDW**. Verified live: mounting
-GitLab and syncing `projects` materializes 1000 rows into `shadow.s1__projects`.
+The server calls the engine directly (`catalog::spec_for` → `RestConnector`, or a
+`GraphQlConnector` for GraphQL sources → `discover`/`fetch`), so **sync does not
+require the FDW**. Verified live end-to-end against Asana, Freshdesk, Hugging Face
+(1000 rows), Twilio, and Monday.com (GraphQL).
 
 ## Architecture
 
@@ -74,8 +74,10 @@ to `http://localhost:8080`).
 
 ## MVP scope & follow-ups
 
-Working now: REST-catalog connectors (49), full-refresh sync, a tokio scheduler,
-in-memory source registry, shadow tables, the API, and all three panel screens.
+Working now: REST-catalog connectors (52) **and GraphQL sources** (e.g. Monday.com),
+credential encryption + live validation, full-refresh sync, a tokio scheduler,
+in-memory source registry, shadow tables, the API, and all three panel screens
+(catalog, sources, analytics) with client-side routing.
 
 Deliberately deferred (see ROADMAP):
 - **Secrets** — secret values are AES-256-GCM encrypted at rest (key from
@@ -85,4 +87,4 @@ Deliberately deferred (see ROADMAP):
 - **Incremental sync** (watermark) — today each sync is a full refresh (capped
   at 1000 rows/table).
 - **Persistence** — sources reset on restart.
-- **Auth** on the panel, and **GraphQL** sources.
+- **Auth** on the panel.

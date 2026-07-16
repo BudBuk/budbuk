@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>A high-performance, PostgreSQL-native data integration platform in Rust.</strong><br>
-  Query <strong>50+ SaaS sources</strong> — Jira, GitHub, Stripe, Slack, Salesforce-style CRMs, and more — with plain SQL. Fast, cached, and safe.
+  Query <strong>53 SaaS sources</strong> — Jira, GitHub, Stripe, Slack, Salesforce-style CRMs, and more — with plain SQL. Fast, cached, and safe.
 </p>
 
 <p align="center">
@@ -21,18 +21,21 @@
   <a href="ROADMAP.md"><b>Roadmap</b></a> ·
   <a href="docs/configuration.md"><b>Configuration</b></a> ·
   <a href="CONNECTORS.md"><b>Connector tracker</b></a> ·
-  <a href="control-panel/"><b>Control panel</b></a> ·
+  <a href="#control-panel"><b>Control panel</b></a> ·
   <a href="CONTRIBUTING.md"><b>Contributing</b></a>
 </p>
 
 ---
 
-> **Status: working proof of concept.** BudBuk ships **50 out-of-the-box connectors**
+> **Status: working proof of concept.** BudBuk ships **53 out-of-the-box connectors**
 > plus generic **REST/OpenAPI** and **GraphQL** engines — all queryable from PostgreSQL
-> via a `pgrx` Foreign Data Wrapper. The engine (schema discovery, live fetching,
-> pagination, caching, predicate pushdown, observability) is proven live against real
-> Jira, GitHub, Stripe, GitLab, and GraphQL endpoints. See
-> [Connectors](#connectors) and [Querying from PostgreSQL](#querying-from-postgresql-the-fdw).
+> via a `pgrx` Foreign Data Wrapper. A **[control panel](#control-panel)** (React + Axum)
+> mounts sources through a UI, encrypts and live-validates credentials, and syncs data
+> into PostgreSQL **shadow tables** in the background. The engine (schema discovery, live
+> fetching, pagination, caching, predicate pushdown, observability) is proven live against
+> real Jira, GitHub, Stripe, GitLab, Hugging Face, Monday, and GraphQL endpoints. See
+> [Connectors](#connectors), [Control panel](#control-panel), and
+> [Querying from PostgreSQL](#querying-from-postgresql-the-fdw).
 
 ## What is BudBuk?
 
@@ -67,7 +70,7 @@ web APIs — without writing a single line of glue code per query.
 
 ## Connectors
 
-**50 sources ship out-of-the-box.** Mount any of them with just a connector name and
+**53 sources ship out-of-the-box.** Mount any of them with just a connector name and
 credentials — exactly like Jira: `CREATE SERVER x OPTIONS (connector 'stripe', api_key '…')`.
 Each is a declarative `SourceSpec` over the shared engine (no bespoke HTTP code), at 100%
 line coverage. The long tail is covered by generic **REST/OpenAPI** and **GraphQL**
@@ -81,11 +84,12 @@ connectors — bring your own spec or OpenAPI/introspection document.
 | **Payments & billing** | Stripe · PayPal · Square · Chargebee · Recurly |
 | **E-commerce** | Shopify · WooCommerce · BigCommerce |
 | **Comms & meetings** | Slack · Zoom · Twilio · Calendly |
-| **Work, docs & CMS** | Asana · Smartsheet · Notion · Confluence · Contentful |
+| **Work, docs & CMS** | Asana · Monday.com · Smartsheet · Notion · Confluence · Contentful |
 | **Forms & email** | Typeform · SurveyMonkey · SendGrid |
 | **Identity & files** | Okta · Auth0 · Box · Google Drive · Microsoft Graph |
 | **Observability** | Datadog · Grafana |
 | **HR & recruiting** | Greenhouse · Lever |
+| **AI & ML** | Hugging Face · Granola |
 | **Finance & other** | Xero · DocuSign · Google Calendar |
 | **Meta (bring your own)** | Generic REST / OpenAPI · Generic GraphQL |
 
@@ -96,7 +100,7 @@ notes, and the roadmap of what's next.
 
 | Area | What you get |
 |------|--------------|
-| **50 connectors** | Bundled `SourceSpec`s mount out-of-the-box via a **catalog** — just a name + credentials. |
+| **53 connectors** | Bundled `SourceSpec`s mount out-of-the-box via a **catalog** — just a name + credentials. |
 | **REST + GraphQL** | One config-driven REST engine *and* a GraphQL engine; generate specs from OpenAPI or GraphQL introspection. |
 | **Schema discovery** | Each connector exposes typed tables (columns + PostgreSQL-ish types). |
 | **Zero-DDL mounting** | `IMPORT FOREIGN SCHEMA` auto-creates every foreign table from discovery — *optional*; hand-written `CREATE FOREIGN TABLE` still works, and `LIMIT TO`/`EXCEPT` scope it. |
@@ -106,6 +110,7 @@ notes, and the roadmap of what's next.
 | **Predicate pushdown** | Translates `WHERE` / `ORDER BY` / `LIMIT` into the source's query params or query language (JQL for Jira). |
 | **Multi-account** | One connector *type*, many *instances* (e.g. two Jira accounts), with isolated credentials and namespaced caches. |
 | **Error handling** | Typed errors; network/auth/parse failures are contained, not fatal. |
+| **Control panel** | React UI + Axum service: mount sources, **encrypt** & **live-validate** credentials, and **sync** into PostgreSQL shadow tables on a schedule. See [Control panel](#control-panel). |
 | **100% line coverage** | Enforced in CI; see [Development](#development). |
 
 ## Architecture
@@ -166,7 +171,7 @@ budbuk/
 │   │       └── cli.rs          # demo against JSONPlaceholder (no auth)
 │   ├── graphql-connector/ # Config-driven GraphQL engine + introspection generator
 │   │   └── src/                # GraphQlSpec, GraphQlConnector, introspect.rs, cli.rs
-│   ├── <source>-connector/# 45+ bundled connectors, each a SourceSpec (no HTTP code):
+│   ├── <source>-connector/# 50+ bundled connectors, each a SourceSpec (no HTTP code):
 │   │   └── src/lib.rs          #   github, stripe, slack, hubspot, notion, datadog, …
 │   ├── catalog/           # Maps a connector name → bundled SourceSpec (out-of-the-box)
 │   │   ├── src/lib.rs          # spec_for("stripe", opts) → SourceSpec
@@ -174,6 +179,9 @@ budbuk/
 │   ├── jira-fdw/          # PostgreSQL FDW for Jira (pgrx; excluded from workspace)
 │   ├── rest-fdw/          # Generic REST FDW: any SourceSpec/catalog name → SQL (pgrx)
 │   └── graphql-fdw/       # Generic GraphQL FDW: any GraphQlSpec → SQL (pgrx)
+├── control-panel/         # React UI + Axum service: mount, encrypt/validate, sync
+│   ├── server/            #   Axum API, AES-256-GCM crypto, sync scheduler, shadow tables
+│   └── web/               #   React + Vite SPA (catalog, mount, sources, analytics)
 ├── docs/                  # design specs
 ├── .github/workflows/     # CI + release
 └── Makefile               # dev tasks
@@ -349,6 +357,55 @@ with Relay cursor pagination handled for you. Example in
 and the isolation/security model — is in [docs/configuration.md](docs/configuration.md).**
 A runnable example is in [`crates/rest-fdw/sql/example.sql`](crates/rest-fdw/sql/example.sql).
 
+## Control panel
+
+Beyond the FDW, BudBuk ships a **control panel** — a React single-page app served by an
+[Axum](https://github.com/tokio-rs/axum) service (`control-panel/`) — that turns "mount a
+source and keep its data fresh" into a point-and-click flow, no SQL required.
+
+<p align="center">
+  <em>Catalog → mount with credentials → background sync → query the shadow tables.</em>
+</p>
+
+**What it does**
+
+- **Browse the catalog.** All 53 connectors, grouped by category with brand logos, search,
+  and a category filter. Each card knows its **required vs. optional** fields.
+- **Mount from a form.** The mount dialog is generated from each connector's option spec, so
+  you only fill in the fields that source actually needs.
+- **Credentials are encrypted at rest.** Secret fields (API keys, tokens, passwords) are
+  sealed with **AES-256-GCM** before they touch the database — the key comes from
+  `BUDBUK_SECRET_KEY` (or a per-process random key in dev).
+- **Credentials are validated on save.** Before storing anything, the panel builds the
+  connector, runs schema discovery, and does a one-row probe fetch against the real API —
+  so a bad token is caught immediately with a clear error, not on the first sync.
+- **Background sync into shadow tables.** A scheduler periodically fetches each mounted
+  table and materializes it into `shadow."<source>__<table>"` in PostgreSQL, so downstream
+  queries read cached rows at local-table speed. Sync can also be triggered on demand.
+- **Analytics + real URLs.** A live analytics view summarizes sync activity, and the app
+  uses client-side routing (`/catalog`, `/sources`, `/analytics`) with deep-linkable,
+  refresh-safe URLs.
+
+**Run it locally**
+
+```bash
+# 1. Postgres running (the pgrx-managed instance on :28814 works fine)
+# 2. build + serve the API (also serves the built React app)
+cd control-panel/web && npm install && npm run build
+cd ../server
+DATABASE_URL="postgres://$USER@localhost:28814/postgres" \
+  STATIC_DIR="$PWD/../web/dist" PORT=8099 \
+  BUDBUK_SECRET_KEY="<32-byte-base64>" \
+  cargo run
+# open http://localhost:8099
+```
+
+> **REST vs. FDW.** The control panel talks to the connector engine directly and stores
+> results as regular PostgreSQL tables (`shadow.*`), which is complementary to the live
+> FDW path above — use the FDW for always-live reads, the shadow tables for fast,
+> cache-warm reads and cross-source SQL. See [ROADMAP.md](ROADMAP.md) for how these fit
+> together.
+
 ## Observability
 
 BudBuk emits structured logs via the [`tracing`](https://docs.rs/tracing) crate. The
@@ -391,10 +448,10 @@ residual being error-propagation branches that don't fire on a successful run).
 
 ## Roadmap
 
-> **Platform vision** — zero-DDL setup (`IMPORT FOREIGN SCHEMA`), background data sync
-> (shadow tables), a React management console, and an agent (MCP) layer — is mapped out in
-> **[ROADMAP.md](ROADMAP.md)**, with verified feasibility notes. The checklist below tracks
-> the engine.
+> **Platform vision** — zero-DDL setup (`IMPORT FOREIGN SCHEMA` ✅), background data sync
+> (shadow tables ✅), a React management console (the [control panel](#control-panel) ✅), and
+> an agent (MCP) layer — is mapped out in **[ROADMAP.md](ROADMAP.md)**, with verified
+> feasibility notes. The checklist below tracks the engine.
 
 - [x] Connector SDK: `Connector` trait, neutral types, typed errors
 - [x] Jira connector: live REST fetching for projects, issues, users, worklogs
@@ -406,17 +463,23 @@ residual being error-propagation branches that don't fire on a successful run).
       `SELECT` from Jira in `psql`, with predicate pushdown
 - [x] Generic REST FDW (`rest-fdw`) — drives any `SourceSpec` from a server option,
       so GitHub / OpenAPI-imported / hand-written connectors are all SQL-queryable
+- [x] **Control panel** — React UI + Axum service to mount sources, browse the catalog,
+      and drive syncs (`control-panel/`); see [Control panel](#control-panel)
+- [x] **Background sync into shadow tables** — scheduler materializes each mounted table
+      into `shadow."<source>__<table>"` for fast, cache-warm SQL reads
+- [x] **Encrypted + validated credentials** — secrets sealed with AES-256-GCM at rest and
+      probe-fetched against the live API on save
 - [ ] Metrics export (Prometheus / OpenTelemetry)
-- [ ] Persistent PostgreSQL-backed cache + incremental sync (shared across queries)
-- [ ] Secrets management (secure credential storage; OAuth flows)
+- [ ] Persistent PostgreSQL-backed cache + **incremental** sync (watermark-based, shared across queries)
+- [ ] Secrets management: external secret stores + OAuth flows
 - [x] Config-driven **generic REST engine** (`rest-connector`) — any API from a
       declarative `SourceSpec`; auth, pagination, and predicate pushdown built in
 - [x] **OpenAPI → `SourceSpec` importer** — auto-generate a connector from an
       OpenAPI document (`SourceSpec::from_openapi`); imports **Stripe's official
       104-table spec** directly, with cursor pagination auto-detected
-- [x] **50 out-of-the-box connectors** via a bundled **catalog** — GitHub, Stripe,
-      Slack, HubSpot, Notion, Datadog, and 44 more mount with just a name + credentials
-      (see [Connectors](#connectors) / the [tracker](CONNECTORS.md))
+- [x] **53 out-of-the-box connectors** via a bundled **catalog** — GitHub, Stripe,
+      Slack, HubSpot, Notion, Datadog, Hugging Face, Monday, and 45 more mount with just a
+      name + credentials (see [Connectors](#connectors) / the [tracker](CONNECTORS.md))
 - [x] **GraphQL** connector (`graphql-connector`) — config-driven engine, Relay cursor
       pagination, and an **introspection → spec generator**, plus a generic GraphQL FDW
 - [x] `AuthSpec::Headers` for multi-header APIs (Notion, Datadog, Klaviyo, Xero)

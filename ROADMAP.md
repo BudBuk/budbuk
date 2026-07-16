@@ -1,6 +1,6 @@
 # BudBuk Platform Roadmap
 
-BudBuk today is a **PostgreSQL-native connector engine**: 50 out-of-the-box sources
+BudBuk today is a **PostgreSQL-native connector engine**: 53 out-of-the-box sources
 (plus generic REST/OpenAPI and GraphQL), queryable as foreign tables via a `pgrx` FDW,
 with predicate pushdown, an in-memory cache, and 100% test coverage.
 
@@ -20,12 +20,13 @@ all Postgres-native.
 |---|---|
 | Config-driven REST engine + OpenAPI importer | ✅ |
 | GraphQL engine + introspection generator + FDW | ✅ |
-| 50 out-of-the-box connectors via a catalog | ✅ |
+| 53 out-of-the-box connectors via a catalog | ✅ |
 | Generic REST FDW (`connector`/`spec` options) | ✅ |
 | Predicate pushdown (`WHERE`/`ORDER BY`/`LIMIT`) | ✅ |
 | In-memory cache (TTL + stale-while-revalidate) | ✅ |
 | rustls TLS (fork-safe inside the backend) | ✅ |
-| Live-verified in `psql` | ⚠️ ~5 of 50 (Jira, GitHub, Stripe, GitLab, GraphQL) |
+| Live-verified in `psql` | ⚠️ ~5 of 53 (Jira, GitHub, Stripe, GitLab, GraphQL) |
+| Live-verified via control panel | ✅ Asana, Freshdesk, Hugging Face, Twilio, Monday.com |
 | Mounting foreign tables | ✅ `IMPORT FOREIGN SCHEMA` (auto) or manual |
 | Data materialization / sync | ✅ MVP — shadow tables + scheduled sync (control-panel) |
 | Setup UI | ✅ MVP — React control panel (mount, sync, preview) |
@@ -152,7 +153,7 @@ directly.
 
 **Goal:** point-and-click setup — nobody writes SQL to onboard a source.
 
-- **Catalog browser** — all 50 connectors, their tables/columns.
+- **Catalog browser** — all 53 connectors, their tables/columns.
 - **One-click mount** — pick connector → enter credentials → runs `CREATE SERVER` +
   `IMPORT FOREIGN SCHEMA` under the hood.
 - **Schema explorer + query console** — preview tables, sample rows, run SQL (pgAdmin-lite,
