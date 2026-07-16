@@ -44,6 +44,11 @@ members = [
     "crates/greenhouse-connector",
     "crates/lever-connector",
     "crates/chargebee-connector",
+    "crates/paypal-connector",
+    "crates/docusign-connector",
+    "crates/box-connector",
+    "crates/jsm-connector",
+    "crates/grafana-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

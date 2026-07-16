@@ -97,7 +97,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
 | 31 | ⬜ | **Mixpanel** | Product analytics | service account / secret | Amplitude sibling |
-| 32 | ⬜ | **PayPal** | Payments | OAuth2 | Stripe alternative |
+| 32 | ✅ | **PayPal** | Payments | OAuth2 | Stripe alternative |
 | 33 | ⬜ | **Microsoft Teams** | Comms | OAuth2 (Graph) | Enterprise Slack alt |
 | 34 | ✅ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
 | 35 | ✅ | **Freshdesk** | Support | API key | Zendesk alternative |
@@ -130,10 +130,10 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 52 | ✅ | **Bitbucket** | Dev | OAuth2 / app password | Atlassian repo host |
 | 53 | ⬜ | **Trello** | Work mgmt | API key + token | Atlassian boards |
 | 54 | ⬜ | **ClickUp** | Work mgmt | OAuth2 / API token | Growing PM tool |
-| 55 | ⬜ | **Jira Service Management** | ITSM | API token (Atlassian) | Reuses Jira work |
+| 55 | ✅ | **Jira Service Management** | ITSM | API token (Atlassian) | Reuses Jira work |
 | 56 | ⬜ | **Google Drive** | Files | OAuth2 | Universal file store |
 | 57 | ⬜ | **Dropbox** | Files | OAuth2 | Common file store |
-| 58 | ⬜ | **Box** | Files | OAuth2 / JWT | Enterprise file store |
+| 58 | ✅ | **Box** | Files | OAuth2 / JWT | Enterprise file store |
 | 59 | ✅ | **Okta** | Identity | API token / OAuth2 | SSO/audit logs |
 | 60 | ✅ | **Auth0** | Identity | OAuth2 (mgmt API) | Dev-centric identity |
 
@@ -175,7 +175,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 82 | ⬜ | **Gusto** | Payroll | OAuth2 | SMB payroll |
 | 83 | ⬜ | **Rippling** | HR/IT | API key / OAuth2 | Fast-growing |
 | 84 | ⬜ | **ADP** | Payroll | OAuth2 (certs) | Enterprise payroll |
-| 85 | ⬜ | **DocuSign** | E-signature | OAuth2 (JWT) | Contract data |
+| 85 | ✅ | **DocuSign** | E-signature | OAuth2 (JWT) | Contract data |
 | 86 | ✅ | **Calendly** | Scheduling | OAuth2 / PAT | Booking data |
 | 87 | ⬜ | **Gmail / Google Workspace** | Email | OAuth2 | Mailbox/audit data |
 | 88 | ⬜ | **Microsoft 365 / Outlook** | Email/Calendar | OAuth2 (Graph) | Enterprise mail |
@@ -187,7 +187,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
 | 91 | ⬜ | **New Relic** | Observability | API key (NerdGraph) | APM data |
-| 92 | ⬜ | **Grafana / Prometheus** | Metrics | API key / basic | Metrics store |
+| 92 | ✅ | **Grafana / Prometheus** | Metrics | API key / basic | Metrics store |
 | 93 | ⬜ | **Splunk** | Logs/SIEM | token / basic | Enterprise logs |
 | 94 | ✅ | **Opsgenie** | Incident | API key | PagerDuty sibling (Atlassian) |
 | 95 | ⬜ | **Zuora** | Billing | OAuth2 / token | Enterprise billing |

@@ -444,3 +444,54 @@ async fn batch6_connectors_span_the_catalog() {
     assert_eq!(gh_rows[0].0[0].to_display_string(), "9");
     assert_eq!(cb_rows[0].0[0].to_display_string(), "sub_1"); // nested subscription.id survived
 }
+
+#[tokio::test]
+async fn batch7_connectors_span_the_catalog() {
+    //   paypal  — "/plans" pointer, Bearer
+    //   box     — "/entries" pointer, Bearer
+    //   grafana — root array, Bearer
+    let pp = MockServer::start().await;
+    mount(
+        &pp,
+        "/v1/billing/plans",
+        json!({"plans": [{"id": "P1", "name": "Gold", "status": "ACTIVE"}]}),
+    )
+    .await;
+    let bx = MockServer::start().await;
+    mount(
+        &bx,
+        "/users",
+        json!({"entries": [{"id": "u1", "name": "Ada", "login": "a@b.c"}]}),
+    )
+    .await;
+    let gf = MockServer::start().await;
+    mount(
+        &gf,
+        "/datasources",
+        json!([{"id": 3, "name": "Prom", "type": "prometheus"}]),
+    )
+    .await;
+
+    let pp_rows = fetch(
+        "paypal",
+        &opts(&[("base_url", pp.uri().as_str()), ("token", "t")]),
+        "plans",
+    )
+    .await;
+    let bx_rows = fetch(
+        "box",
+        &opts(&[("base_url", bx.uri().as_str()), ("token", "t")]),
+        "users",
+    )
+    .await;
+    let gf_rows = fetch(
+        "grafana",
+        &opts(&[("base_url", gf.uri().as_str()), ("token", "t")]),
+        "datasources",
+    )
+    .await;
+
+    assert_eq!(pp_rows[0].0[0].to_display_string(), "P1");
+    assert_eq!(bx_rows[0].0[0].to_display_string(), "u1");
+    assert_eq!(gf_rows[0].0[0].to_display_string(), "3");
+}

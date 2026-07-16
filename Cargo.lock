@@ -112,6 +112,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
+name = "box-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -143,22 +154,27 @@ dependencies = [
  "auth0-connector",
  "bigcommerce-connector",
  "bitbucket-connector",
+ "box-connector",
  "calendly-connector",
  "chargebee-connector",
  "confluence-connector",
  "connector-sdk",
  "contentful-connector",
+ "docusign-connector",
  "freshdesk-connector",
  "github-connector",
  "gitlab-connector",
+ "grafana-connector",
  "greenhouse-connector",
  "hubspot-connector",
  "intercom-connector",
+ "jsm-connector",
  "lever-connector",
  "mailchimp-connector",
  "okta-connector",
  "opsgenie-connector",
  "pagerduty-connector",
+ "paypal-connector",
  "pipedrive-connector",
  "recurly-connector",
  "rest-connector",
@@ -297,6 +313,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "docusign-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -494,6 +521,17 @@ dependencies = [
 
 [[package]]
 name = "gitlab-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "grafana-connector"
 version = "0.1.0"
 dependencies = [
  "connector-sdk",
@@ -846,6 +884,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsm-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1017,6 +1066,17 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "windows-link",
+]
+
+[[package]]
+name = "paypal-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]

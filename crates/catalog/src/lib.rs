@@ -20,21 +20,26 @@ use asana_connector::{asana_spec, AsanaConfig};
 use auth0_connector::{auth0_spec, Auth0Config};
 use bigcommerce_connector::{bigcommerce_spec, BigCommerceConfig};
 use bitbucket_connector::{bitbucket_spec, BitbucketConfig};
+use box_connector::{box_spec, BoxConfig};
 use calendly_connector::{calendly_spec, CalendlyConfig};
 use chargebee_connector::{chargebee_spec, ChargebeeConfig};
 use confluence_connector::{confluence_spec, ConfluenceConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
+use docusign_connector::{docusign_spec, DocusignConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
+use grafana_connector::{grafana_spec, GrafanaConfig};
 use greenhouse_connector::{greenhouse_spec, GreenhouseConfig};
 use hubspot_connector::{hubspot_spec, HubspotConfig};
 use intercom_connector::{intercom_spec, IntercomConfig};
+use jsm_connector::{jsm_spec, JsmConfig};
 use lever_connector::{lever_spec, LeverConfig};
 use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
 use okta_connector::{okta_spec, OktaConfig};
 use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
+use paypal_connector::{paypal_spec, PaypalConfig};
 use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
 use recurly_connector::{recurly_spec, RecurlyConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
@@ -105,6 +110,11 @@ pub fn list() -> &'static [&'static str] {
         "greenhouse",
         "lever",
         "chargebee",
+        "paypal",
+        "docusign",
+        "box",
+        "jsm",
+        "grafana",
         "openapi",
     ]
 }
@@ -350,6 +360,36 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
         "chargebee" => Ok(chargebee_spec(&ChargebeeConfig {
             base_url: require("base_url")?.to_string(),
             api_key: require("api_key")?.to_string(),
+        })),
+
+        "paypal" => Ok(paypal_spec(&PaypalConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api-m.paypal.com")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "docusign" => Ok(docusign_spec(&DocusignConfig {
+            base_url: require("base_url")?.to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "box" => Ok(box_spec(&BoxConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.box.com/2.0")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "jsm" => Ok(jsm_spec(&JsmConfig {
+            base_url: require("base_url")?.to_string(),
+            email: require("email")?.to_string(),
+            api_token: require("api_token")?.to_string(),
+        })),
+
+        "grafana" => Ok(grafana_spec(&GrafanaConfig {
+            base_url: require("base_url")?.to_string(),
+            token: require("token")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -740,6 +780,58 @@ mod tests {
             ("greenhouse", opts(&[])),
             ("lever", opts(&[])),
             ("chargebee", opts(&[("api_key", "k")])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch7_connectors_resolve_from_options() {
+        assert!(spec_for("paypal", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("invoices")
+            .is_some());
+        assert!(spec_for(
+            "docusign",
+            &opts(&[
+                ("base_url", "https://x/restapi/v2.1/accounts/1"),
+                ("token", "t")
+            ])
+        )
+        .unwrap()
+        .table("templates")
+        .is_some());
+        assert!(spec_for("box", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("users")
+            .is_some());
+        assert!(spec_for(
+            "jsm",
+            &opts(&[
+                ("base_url", "https://x.atlassian.net/rest/servicedeskapi"),
+                ("email", "a@b.c"),
+                ("api_token", "t")
+            ])
+        )
+        .unwrap()
+        .table("request")
+        .is_some());
+        assert!(spec_for(
+            "grafana",
+            &opts(&[("base_url", "https://g/api"), ("token", "t")])
+        )
+        .unwrap()
+        .table("datasources")
+        .is_some());
+        for (name, o) in [
+            ("paypal", opts(&[])),
+            ("docusign", opts(&[("token", "t")])),
+            ("box", opts(&[])),
+            ("jsm", opts(&[("email", "a@b.c")])),
+            ("grafana", opts(&[("token", "t")])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),
