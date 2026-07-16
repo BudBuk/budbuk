@@ -227,3 +227,55 @@ async fn batch2_connectors_span_the_catalog() {
     assert_eq!(sl_rows[0].0[0].to_display_string(), "U1");
     assert_eq!(sn_rows[0].0[0].to_display_string(), "s1");
 }
+
+#[tokio::test]
+async fn batch3_connectors_span_the_catalog() {
+    //   okta     — root array, SSWS header
+    //   twilio   — "/messages" pointer, Basic, Page pagination
+    //   opsgenie — "/data" pointer, GenieKey header, Offset pagination
+    let ok = MockServer::start().await;
+    mount(
+        &ok,
+        "/users",
+        json!([{"id": "u1", "status": "ACTIVE", "created": "2026-01-01T00:00:00Z"}]),
+    )
+    .await;
+
+    let tw = MockServer::start().await;
+    mount(&tw, "/Messages.json", json!({"messages": [{"sid": "SM1", "status": "sent", "to": "+1", "from": "+2", "body": "hi"}]})).await;
+
+    let og = MockServer::start().await;
+    mount(
+        &og,
+        "/alerts",
+        json!({"data": [{"id": "a1", "message": "down", "status": "open", "priority": "P1"}]}),
+    )
+    .await;
+
+    let ok_rows = fetch(
+        "okta",
+        &opts(&[("base_url", ok.uri().as_str()), ("token", "t")]),
+        "users",
+    )
+    .await;
+    let tw_rows = fetch(
+        "twilio",
+        &opts(&[
+            ("base_url", tw.uri().as_str()),
+            ("account_sid", "AC"),
+            ("auth_token", "t"),
+        ]),
+        "messages",
+    )
+    .await;
+    let og_rows = fetch(
+        "opsgenie",
+        &opts(&[("base_url", og.uri().as_str()), ("api_key", "k")]),
+        "alerts",
+    )
+    .await;
+
+    assert_eq!(ok_rows[0].0[0].to_display_string(), "u1");
+    assert_eq!(tw_rows[0].0[0].to_display_string(), "SM1");
+    assert_eq!(og_rows[0].0[0].to_display_string(), "a1");
+}

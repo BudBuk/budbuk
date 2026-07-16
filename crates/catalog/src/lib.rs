@@ -16,6 +16,7 @@
 use std::collections::HashMap;
 
 use asana_connector::{asana_spec, AsanaConfig};
+use auth0_connector::{auth0_spec, Auth0Config};
 use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
@@ -23,6 +24,8 @@ use gitlab_connector::{gitlab_spec, GitLabConfig};
 use hubspot_connector::{hubspot_spec, HubspotConfig};
 use intercom_connector::{intercom_spec, IntercomConfig};
 use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
+use okta_connector::{okta_spec, OktaConfig};
+use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
 use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
@@ -31,6 +34,8 @@ use servicenow_connector::{servicenow_spec, ServiceNowConfig};
 use shopify_connector::{shopify_spec, ShopifyConfig};
 use slack_connector::{slack_spec, SlackConfig};
 use stripe_connector::stripe_spec;
+use twilio_connector::{twilio_spec, TwilioConfig};
+use typeform_connector::{typeform_spec, TypeformConfig};
 use zendesk_connector::{zendesk_spec, ZendeskConfig};
 use zoom_connector::{zoom_spec, ZoomConfig};
 
@@ -65,6 +70,11 @@ pub fn list() -> &'static [&'static str] {
         "mailchimp",
         "zoom",
         "servicenow",
+        "okta",
+        "auth0",
+        "twilio",
+        "typeform",
+        "opsgenie",
         "openapi",
     ]
 }
@@ -182,6 +192,36 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
             base_url: require("base_url")?.to_string(),
             username: require("username")?.to_string(),
             password: require("password")?.to_string(),
+        })),
+
+        "okta" => Ok(okta_spec(&OktaConfig {
+            base_url: require("base_url")?.to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "auth0" => Ok(auth0_spec(&Auth0Config {
+            base_url: require("base_url")?.to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "twilio" => Ok(twilio_spec(&TwilioConfig {
+            base_url: require("base_url")?.to_string(),
+            account_sid: require("account_sid")?.to_string(),
+            auth_token: require("auth_token")?.to_string(),
+        })),
+
+        "typeform" => Ok(typeform_spec(&TypeformConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.typeform.com")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "opsgenie" => Ok(opsgenie_spec(&OpsgenieConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.opsgenie.com/v2")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -374,6 +414,58 @@ mod tests {
             ("mailchimp", opts(&[("api_key", "k")])),
             ("zoom", opts(&[])),
             ("servicenow", opts(&[("username", "u"), ("password", "p")])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch3_connectors_resolve_from_options() {
+        assert!(spec_for(
+            "okta",
+            &opts(&[("base_url", "https://x.okta.com/api/v1"), ("token", "t")])
+        )
+        .unwrap()
+        .table("users")
+        .is_some());
+        assert!(spec_for(
+            "auth0",
+            &opts(&[("base_url", "https://x.auth0.com/api/v2"), ("token", "t")])
+        )
+        .unwrap()
+        .table("users")
+        .is_some());
+        assert!(spec_for(
+            "twilio",
+            &opts(&[
+                ("base_url", "https://api.twilio.com/x"),
+                ("account_sid", "AC"),
+                ("auth_token", "t")
+            ])
+        )
+        .unwrap()
+        .table("messages")
+        .is_some());
+        assert!(spec_for("typeform", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("forms")
+            .is_some());
+        assert!(spec_for("opsgenie", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("alerts")
+            .is_some());
+        for (name, o) in [
+            ("okta", opts(&[("token", "t")])),
+            ("auth0", opts(&[("token", "t")])),
+            (
+                "twilio",
+                opts(&[("base_url", "https://x"), ("account_sid", "AC")]),
+            ),
+            ("typeform", opts(&[])),
+            ("opsgenie", opts(&[])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),

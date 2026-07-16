@@ -134,8 +134,8 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 56 | ⬜ | **Google Drive** | Files | OAuth2 | Universal file store |
 | 57 | ⬜ | **Dropbox** | Files | OAuth2 | Common file store |
 | 58 | ⬜ | **Box** | Files | OAuth2 / JWT | Enterprise file store |
-| 59 | ⬜ | **Okta** | Identity | API token / OAuth2 | SSO/audit logs |
-| 60 | ⬜ | **Auth0** | Identity | OAuth2 (mgmt API) | Dev-centric identity |
+| 59 | ✅ | **Okta** | Identity | API token / OAuth2 | SSO/audit logs |
+| 60 | ✅ | **Auth0** | Identity | OAuth2 (mgmt API) | Dev-centric identity |
 
 ## Tier 7 — marketing automation, forms, social
 
@@ -145,7 +145,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 62 | ⬜ | **Salesforce Pardot** | Marketing automation | OAuth2 | B2B MA |
 | 63 | ⬜ | **ActiveCampaign** | Marketing/CRM | API key | SMB MA |
 | 64 | ⬜ | **SendGrid** | Email delivery | API key | Transactional email |
-| 65 | ⬜ | **Typeform** | Forms | OAuth2 / PAT | Survey/lead data |
+| 65 | ✅ | **Typeform** | Forms | OAuth2 / PAT | Survey/lead data |
 | 66 | ⬜ | **SurveyMonkey** | Surveys | OAuth2 | Survey data |
 | 67 | ⬜ | **Google Search Console** | SEO | OAuth2 | Search performance |
 | 68 | ⬜ | **YouTube (Data/Analytics)** | Media | OAuth2 | Channel/video metrics |
@@ -179,7 +179,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 86 | ⬜ | **Calendly** | Scheduling | OAuth2 / PAT | Booking data |
 | 87 | ⬜ | **Gmail / Google Workspace** | Email | OAuth2 | Mailbox/audit data |
 | 88 | ⬜ | **Microsoft 365 / Outlook** | Email/Calendar | OAuth2 (Graph) | Enterprise mail |
-| 89 | ⬜ | **Twilio** | Comms/SMS | API key (SID/token) | Messaging usage |
+| 89 | ✅ | **Twilio** | Comms/SMS | API key (SID/token) | Messaging usage |
 | 90 | ⬜ | **Braze** | Engagement | API key | Lifecycle messaging |
 
 ## Tier 10 — observability, CDP, specialized
@@ -189,7 +189,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 91 | ⬜ | **New Relic** | Observability | API key (NerdGraph) | APM data |
 | 92 | ⬜ | **Grafana / Prometheus** | Metrics | API key / basic | Metrics store |
 | 93 | ⬜ | **Splunk** | Logs/SIEM | token / basic | Enterprise logs |
-| 94 | ⬜ | **Opsgenie** | Incident | API key | PagerDuty sibling (Atlassian) |
+| 94 | ✅ | **Opsgenie** | Incident | API key | PagerDuty sibling (Atlassian) |
 | 95 | ⬜ | **Zuora** | Billing | OAuth2 / token | Enterprise billing |
 | 96 | ⬜ | **RudderStack** | CDP | access token | Segment alternative |
 | 97 | ⬜ | **Smartsheet** | Work mgmt | API token / OAuth2 | Enterprise spreadsheets |

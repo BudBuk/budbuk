@@ -30,6 +30,11 @@ slack-connector = { path = "../slack-connector" }
 mailchimp-connector = { path = "../mailchimp-connector" }
 zoom-connector = { path = "../zoom-connector" }
 servicenow-connector = { path = "../servicenow-connector" }
+okta-connector = { path = "../okta-connector" }
+auth0-connector = { path = "../auth0-connector" }
+twilio-connector = { path = "../twilio-connector" }
+typeform-connector = { path = "../typeform-connector" }
+opsgenie-connector = { path = "../opsgenie-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

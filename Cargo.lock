@@ -56,6 +56,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
+name = "auth0-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -84,6 +95,7 @@ name = "catalog"
 version = "0.1.0"
 dependencies = [
  "asana-connector",
+ "auth0-connector",
  "connector-sdk",
  "contentful-connector",
  "freshdesk-connector",
@@ -92,6 +104,8 @@ dependencies = [
  "hubspot-connector",
  "intercom-connector",
  "mailchimp-connector",
+ "okta-connector",
+ "opsgenie-connector",
  "pagerduty-connector",
  "pipedrive-connector",
  "rest-connector",
@@ -103,6 +117,8 @@ dependencies = [
  "stripe-connector",
  "thiserror 1.0.69",
  "tokio",
+ "twilio-connector",
+ "typeform-connector",
  "wiremock",
  "zendesk-connector",
  "zoom-connector",
@@ -839,10 +855,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "okta-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "opsgenie-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "pagerduty-connector"
@@ -1644,6 +1682,28 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "twilio-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "typeform-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "unicode-ident"

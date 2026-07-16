@@ -24,6 +24,11 @@ members = [
     "crates/mailchimp-connector",
     "crates/zoom-connector",
     "crates/servicenow-connector",
+    "crates/okta-connector",
+    "crates/auth0-connector",
+    "crates/twilio-connector",
+    "crates/typeform-connector",
+    "crates/opsgenie-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be
