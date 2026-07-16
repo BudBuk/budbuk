@@ -92,6 +92,7 @@ const GROUPS: Record<string, Record<string, string>> = {
   },
   'AI & ML': {
     huggingface: 'ML hub — models, datasets, spaces',
+    granola: 'AI meeting notes — notes',
   },
   Meta: {
     openapi: 'Generic OpenAPI — any spec-defined endpoints',
@@ -291,6 +292,7 @@ export const DISPLAY_NAME: Record<string, string> = {
   notion: 'Notion',
   monday: 'Monday.com',
   huggingface: 'Hugging Face',
+  granola: 'Granola',
   openapi: 'OpenAPI',
 }
 
@@ -355,6 +357,7 @@ export const WEBSITE: Record<string, string> = {
   notion: 'https://www.notion.so',
   monday: 'https://monday.com',
   huggingface: 'https://huggingface.co',
+  granola: 'https://granola.ai',
   openapi: 'https://www.openapis.org',
 }
 
