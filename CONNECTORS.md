@@ -12,9 +12,10 @@ shipped; everything else is backlog. Update the **Status** as work progresses.
 | 📋 | Next up — prioritized, not started |
 | ⬜ | Backlog — not picked up yet |
 
-**Progress:** Shipped — Jira, GitHub, and Stripe (all mount out-of-the-box in
-PostgreSQL with just credentials), the config-driven REST engine + OpenAPI importer,
-and a generic REST FDW with a **connector catalog** (`crates/catalog`).
+**Progress:** Shipped — Jira, GitHub, Stripe, **GitLab, Zendesk, PagerDuty,
+Freshdesk, and Contentful** (all mount out-of-the-box in PostgreSQL with just
+credentials), the config-driven REST engine + OpenAPI importer, and a generic
+REST FDW with a **connector catalog** (`crates/catalog`).
 
 > **The model:** standard connectors are out-of-the-box — their `SourceSpec` is
 > bundled in the code and registered in the catalog, so they mount like Jira
@@ -56,7 +57,7 @@ and a generic REST FDW with a **connector catalog** (`crates/catalog`).
 | 5 | ⬜ | **Slack** | Comms | OAuth2 (bot) | Near-universal |
 | 6 | ⬜ | **HubSpot** | CRM/Marketing | OAuth2 / private-app token | Dominant mid-market |
 | 7 | ⬜ | **Google Analytics 4** | Analytics | OAuth2 | Near-universal web analytics |
-| 8 | ⬜ | **Zendesk** | Support | API token / OAuth2 | Clean, filterable API |
+| 8 | ✅ | **Zendesk** | Support | API token / OAuth2 | Clean, filterable API |
 | 9 | ⬜ | **Shopify** | E-commerce | Access token / OAuth2 | E-commerce leader |
 | 10 | ⬜ | **Notion** | Docs/Knowledge | OAuth2 / integration token | Exploding adoption |
 
@@ -66,7 +67,7 @@ and a generic REST FDW with a **connector catalog** (`crates/catalog`).
 |---|--------|-----------|----------|------|-------|
 | 11 | ✅ | **Generic REST / OpenAPI** | Meta | Configurable | `rest-connector`: any API via a `SourceSpec`, hand-written or generated from an OpenAPI doc (`SourceSpec::from_openapi`) |
 | 12 | ⬜ | **Generic SQL database** | Database | DB credentials | Postgres/MySQL/etc. as a source |
-| 13 | ⬜ | **GitLab** | Dev | OAuth2 / PAT | GitHub sibling |
+| 13 | ✅ | **GitLab** | Dev | OAuth2 / PAT | GitHub sibling |
 | 14 | ⬜ | **Google Ads** | Ads | OAuth2 + developer token | Core marketing analytics |
 | 15 | ⬜ | **Meta (Facebook/Instagram) Ads** | Ads | OAuth2 | Core marketing analytics |
 | 16 | ⬜ | **Airtable** | Productivity/DB | PAT / OAuth2 | Spreadsheet-DB |
@@ -98,10 +99,10 @@ and a generic REST FDW with a **connector catalog** (`crates/catalog`).
 | 32 | ⬜ | **PayPal** | Payments | OAuth2 | Stripe alternative |
 | 33 | ⬜ | **Microsoft Teams** | Comms | OAuth2 (Graph) | Enterprise Slack alt |
 | 34 | ⬜ | **Zoom** | Meetings | OAuth2 (S2S) | Usage/reporting data |
-| 35 | ⬜ | **Freshdesk** | Support | API key | Zendesk alternative |
+| 35 | ✅ | **Freshdesk** | Support | API key | Zendesk alternative |
 | 36 | ⬜ | **Klaviyo** | E-comm marketing | API key / OAuth2 | Dominant Shopify-era email |
 | 37 | ⬜ | **Pipedrive** | CRM | API token / OAuth2 | Popular SMB CRM |
-| 38 | ⬜ | **PagerDuty** | Incident mgmt | API token | On-call/incidents |
+| 38 | ✅ | **PagerDuty** | Incident mgmt | API token | On-call/incidents |
 | 39 | ⬜ | **ServiceNow** | ITSM/Enterprise | Basic / OAuth2 | Enterprise workflows |
 | 40 | ⬜ | **NetSuite** | ERP | OAuth2 (token-based) | Mid-market/enterprise ERP |
 

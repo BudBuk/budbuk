@@ -15,7 +15,15 @@ categories.workspace = true
 rest-connector = { path = "../rest-connector" }
 github-connector = { path = "../github-connector" }
 stripe-connector = { path = "../stripe-connector" }
+gitlab-connector = { path = "../gitlab-connector" }
+zendesk-connector = { path = "../zendesk-connector" }
+pagerduty-connector = { path = "../pagerduty-connector" }
+freshdesk-connector = { path = "../freshdesk-connector" }
+contentful-connector = { path = "../contentful-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]
+connector-sdk = { path = "../connector-sdk" }
 serde_json.workspace = true
+wiremock.workspace = true
+tokio.workspace = true

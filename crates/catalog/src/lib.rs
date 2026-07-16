@@ -15,9 +15,14 @@
 
 use std::collections::HashMap;
 
+use contentful_connector::{contentful_spec, ContentfulConfig};
+use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
+use gitlab_connector::{gitlab_spec, GitLabConfig};
+use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
 use stripe_connector::stripe_spec;
+use zendesk_connector::{zendesk_spec, ZendeskConfig};
 
 /// Something went wrong resolving a named connector.
 #[derive(Debug, thiserror::Error)]
@@ -32,7 +37,16 @@ pub enum CatalogError {
 
 /// The built-in connector names.
 pub fn list() -> &'static [&'static str] {
-    &["stripe", "github", "openapi"]
+    &[
+        "stripe",
+        "github",
+        "gitlab",
+        "zendesk",
+        "pagerduty",
+        "freshdesk",
+        "contentful",
+        "openapi",
+    ]
 }
 
 /// Build a [`SourceSpec`] for the named connector from `options`.
@@ -55,6 +69,34 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
             owner: require("owner")?.to_string(),
             repo: get("repo").unwrap_or_default().to_string(),
             token: get("token").map(str::to_string),
+        })),
+
+        "gitlab" => Ok(gitlab_spec(&GitLabConfig {
+            base_url: get("base_url").unwrap_or("https://gitlab.com").to_string(),
+            token: get("token").map(str::to_string),
+        })),
+
+        "zendesk" => Ok(zendesk_spec(&ZendeskConfig {
+            base_url: require("base_url")?.to_string(),
+            email: require("email")?.to_string(),
+            api_token: require("api_token")?.to_string(),
+        })),
+
+        "pagerduty" => Ok(pagerduty_spec(&PagerDutyConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.pagerduty.com")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "freshdesk" => Ok(freshdesk_spec(&FreshdeskConfig {
+            base_url: require("base_url")?.to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "contentful" => Ok(contentful_spec(&ContentfulConfig {
+            base_url: require("base_url")?.to_string(),
+            access_token: require("access_token")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -112,6 +154,54 @@ mod tests {
         .unwrap();
         assert_eq!(spec.name, "github");
         assert!(spec.table("repos").is_some());
+    }
+
+    #[test]
+    fn built_in_connectors_resolve_from_options() {
+        // GitLab and PagerDuty default their base_url; the rest require it.
+        let gl = spec_for("gitlab", &opts(&[("token", "t")])).unwrap();
+        assert_eq!(gl.name, "gitlab");
+        assert!(gl.table("projects").is_some());
+
+        let zd = spec_for(
+            "zendesk",
+            &opts(&[
+                ("base_url", "https://acme.zendesk.com"),
+                ("email", "a@b.c"),
+                ("api_token", "t"),
+            ]),
+        )
+        .unwrap();
+        assert!(zd.table("tickets").is_some());
+
+        let pd = spec_for("pagerduty", &opts(&[("api_key", "k")])).unwrap();
+        assert!(pd.table("incidents").is_some());
+
+        let fd = spec_for(
+            "freshdesk",
+            &opts(&[("base_url", "https://acme.freshdesk.com"), ("api_key", "k")]),
+        )
+        .unwrap();
+        assert!(fd.table("tickets").is_some());
+
+        let cf = spec_for(
+            "contentful",
+            &opts(&[
+                (
+                    "base_url",
+                    "https://cdn.contentful.com/spaces/s/environments/master",
+                ),
+                ("access_token", "t"),
+            ]),
+        )
+        .unwrap();
+        assert!(cf.table("entries").is_some());
+
+        // A required option is enforced for these too.
+        assert!(matches!(
+            spec_for("zendesk", &opts(&[("email", "a@b.c")])).unwrap_err(),
+            CatalogError::MissingOption { .. }
+        ));
     }
 
     #[test]

@@ -65,6 +65,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   orgs exposed as a ~90-line `SourceSpec` over the REST engine — no bespoke HTTP
   code. Works unauthenticated against public data or with a personal access
   token; `WHERE state = '...'` on issues pushes down to the API.
+- **Five more out-of-the-box connectors** (built in parallel, each 100% covered):
+  **GitLab** (projects/issues/users; page pagination), **Zendesk**
+  (tickets/users/organizations; basic auth, pointer row paths), **PagerDuty**
+  (incidents/services/users; offset pagination, `Token` header), **Freshdesk**
+  (tickets/contacts/companies; basic auth), and **Contentful** (entries/assets/
+  content types; nested `sys.*` fields). All registered in the catalog, so they
+  mount out-of-the-box. A cross-connector end-to-end test resolves several
+  connectors through the catalog, fetches from each against mock servers, and
+  combines their rows.
 - **Out-of-the-box connectors via a catalog.** Standard connectors now mount with
   just a name + credentials — like Jira, no spec to generate:
   `CREATE SERVER stripe OPTIONS (connector 'stripe', api_key '…')`.

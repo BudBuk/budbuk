@@ -72,11 +72,19 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 name = "catalog"
 version = "0.1.0"
 dependencies = [
+ "connector-sdk",
+ "contentful-connector",
+ "freshdesk-connector",
  "github-connector",
+ "gitlab-connector",
+ "pagerduty-connector",
  "rest-connector",
  "serde_json",
  "stripe-connector",
  "thiserror",
+ "tokio",
+ "wiremock",
+ "zendesk-connector",
 ]
 
 [[package]]
@@ -105,6 +113,17 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "contentful-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -236,6 +255,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "freshdesk-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "futures"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -356,6 +386,17 @@ dependencies = [
  "rest-connector",
  "serde_json",
  "serial_test",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
+name = "gitlab-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
  "tokio",
  "wiremock",
 ]
@@ -822,6 +863,17 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "pagerduty-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -1817,6 +1869,17 @@ dependencies = [
  "quote",
  "syn",
  "synstructure",
+]
+
+[[package]]
+name = "zendesk-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]

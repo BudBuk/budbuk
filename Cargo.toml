@@ -8,6 +8,11 @@ members = [
     "crates/rest-connector",
     "crates/github-connector",
     "crates/stripe-connector",
+    "crates/gitlab-connector",
+    "crates/zendesk-connector",
+    "crates/pagerduty-connector",
+    "crates/freshdesk-connector",
+    "crates/contentful-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

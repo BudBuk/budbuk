@@ -187,10 +187,15 @@ dependencies = [
 name = "catalog"
 version = "0.1.0"
 dependencies = [
+ "contentful-connector",
+ "freshdesk-connector",
  "github-connector",
+ "gitlab-connector",
+ "pagerduty-connector",
  "rest-connector",
  "stripe-connector",
  "thiserror 1.0.69",
+ "zendesk-connector",
 ]
 
 [[package]]
@@ -331,6 +336,14 @@ name = "const-oid"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
+
+[[package]]
+name = "contentful-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "convert_case"
@@ -545,6 +558,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "freshdesk-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -635,6 +656,14 @@ dependencies = [
  "dotenvy",
  "rest-connector",
  "tokio",
+]
+
+[[package]]
+name = "gitlab-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -1214,6 +1243,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d211803b9b6b570f68772237e415a029d5a50c65d382910b879fb19d3271f94d"
 dependencies = [
  "supports-color",
+]
+
+[[package]]
+name = "pagerduty-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -2984,6 +3021,14 @@ dependencies = [
  "quote",
  "syn 2.0.119",
  "synstructure",
+]
+
+[[package]]
+name = "zendesk-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
