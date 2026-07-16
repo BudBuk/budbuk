@@ -26,7 +26,7 @@ all Postgres-native.
 | In-memory cache (TTL + stale-while-revalidate) | ✅ |
 | rustls TLS (fork-safe inside the backend) | ✅ |
 | Live-verified in `psql` | ⚠️ ~5 of 50 (Jira, GitHub, Stripe, GitLab, GraphQL) |
-| Mounting foreign tables | ⚠️ manual `CREATE FOREIGN TABLE` per table |
+| Mounting foreign tables | ✅ `IMPORT FOREIGN SCHEMA` (auto) or manual |
 | Data materialization / sync | ❌ (live-only) |
 | Setup UI | ❌ |
 | Agent access (MCP) | ❌ |
@@ -57,7 +57,7 @@ Everything the platform needs is exposed by `supabase-wrappers` 0.1.28 and `pgrx
 
 ---
 
-## Phase 1 — Zero-DDL setup: `IMPORT FOREIGN SCHEMA` ✅ next
+## Phase 1 — Zero-DDL setup: `IMPORT FOREIGN SCHEMA` ✅ DONE
 
 **Goal:** mount every table of a connector with one command, no hand-written DDL.
 
@@ -82,8 +82,10 @@ IMPORT FOREIGN SCHEMA stripe FROM SERVER stripe INTO stripe;
 (`Cell::String`); Phase 1 must either emit `text`/`text` for those or teach `value_to_cell`
 to produce true `jsonb`/`timestamptz` cells. Start with the safe mapping, upgrade after.
 
-**Deliverables:** `import_foreign_schema` in both FDWs; a `discover → DDL` helper (unit-
-tested to 100% in the engine crates); docs + example. **Effort: small.** Fully feasible now.
+**Delivered:** `import_foreign_schema` in `rest-fdw` + `graphql-fdw`; a pure `discover → DDL`
+helper in `connector-sdk` (`create_foreign_table_statements`, 100% covered); honors
+`ALL`/`LIMIT TO`/`EXCEPT`. Verified live: `IMPORT FOREIGN SCHEMA … FROM SERVER gl INTO gl`
+auto-created GitLab's tables and queried them, no crash.
 
 ---
 

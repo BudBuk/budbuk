@@ -33,6 +33,17 @@ CREATE FOREIGN TABLE gh.repos (name text, stars bigint, language text)
 
 SELECT name, stars FROM gh.repos ORDER BY stars DESC LIMIT 5;
 
+-- ── Zero-DDL: auto-mount every table with IMPORT FOREIGN SCHEMA ─────────────
+-- Instead of hand-writing CREATE FOREIGN TABLE, let BudBuk create them from the
+-- connector's discovered schema. Honors LIMIT TO / EXCEPT.
+CREATE SERVER gl FOREIGN DATA WRAPPER budbuk OPTIONS (connector 'gitlab');
+CREATE SCHEMA gl;
+IMPORT FOREIGN SCHEMA gitlab FROM SERVER gl INTO gl;
+--   → auto-creates gl.projects, gl.issues, gl.users (typed columns)
+--   IMPORT FOREIGN SCHEMA gitlab LIMIT TO (projects) FROM SERVER gl INTO gl;
+
+SELECT path_with_namespace, visibility FROM gl.projects LIMIT 5;
+
 -- ── The long tail: bring your own OpenAPI document ─────────────────────────
 -- CREATE SERVER myapi FOREIGN DATA WRAPPER budbuk
 --     OPTIONS (connector 'openapi', spec '...openapi json...', token '...');

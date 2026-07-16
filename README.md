@@ -323,8 +323,11 @@ CREATE SERVER gh     OPTIONS (connector 'github', owner 'acme', repo 'app', toke
 -- The long tail: bring your own OpenAPI doc (or a raw SourceSpec)
 CREATE SERVER myapi  OPTIONS (connector 'openapi', spec '…openapi json…', token '…');
 
-CREATE FOREIGN TABLE stripe.charges (id text, amount bigint, status text, customer text)
-    SERVER stripe OPTIONS (object 'charges');
+-- Zero-DDL: auto-create every table a connector exposes (no CREATE FOREIGN TABLE)
+CREATE SCHEMA stripe;
+IMPORT FOREIGN SCHEMA stripe FROM SERVER stripe INTO stripe;   -- → stripe.charges, stripe.customers, …
+--   LIMIT TO (charges, customers)  /  EXCEPT (events)  to scope it
+
 SELECT sum(amount)/100.0 AS revenue FROM stripe.charges WHERE status = 'succeeded';
 ```
 

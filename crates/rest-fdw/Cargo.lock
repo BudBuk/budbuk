@@ -3,6 +3,14 @@
 version = 4
 
 [[package]]
+name = "activecampaign-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -34,6 +42,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a4385e2e34eb35d6b3efe798b9eb88096925d87726c0798709bf56d9ed84af3"
 
 [[package]]
+name = "asana-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "async-trait"
 version = "0.1.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -51,6 +67,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
+name = "auth0-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -61,6 +85,14 @@ name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
+name = "bigcommerce-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "bindgen"
@@ -97,6 +129,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7"
 
 [[package]]
+name = "bitbucket-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -124,6 +164,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "box-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -140,6 +188,14 @@ name = "bytes"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
+
+[[package]]
+name = "calendly-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "camino"
@@ -187,15 +243,57 @@ dependencies = [
 name = "catalog"
 version = "0.1.0"
 dependencies = [
+ "activecampaign-connector",
+ "asana-connector",
+ "auth0-connector",
+ "bigcommerce-connector",
+ "bitbucket-connector",
+ "box-connector",
+ "calendly-connector",
+ "chargebee-connector",
+ "confluence-connector",
  "contentful-connector",
+ "datadog-connector",
+ "docusign-connector",
  "freshdesk-connector",
+ "gcalendar-connector",
+ "gdrive-connector",
  "github-connector",
  "gitlab-connector",
+ "grafana-connector",
+ "greenhouse-connector",
+ "hubspot-connector",
+ "intercom-connector",
+ "jsm-connector",
+ "klaviyo-connector",
+ "lever-connector",
+ "mailchimp-connector",
+ "msgraph-connector",
+ "notion-connector",
+ "okta-connector",
+ "opsgenie-connector",
  "pagerduty-connector",
+ "paypal-connector",
+ "pipedrive-connector",
+ "recurly-connector",
  "rest-connector",
+ "sendgrid-connector",
+ "sentry-connector",
+ "servicenow-connector",
+ "shopify-connector",
+ "slack-connector",
+ "smartsheet-connector",
+ "square-connector",
  "stripe-connector",
+ "surveymonkey-connector",
  "thiserror 1.0.69",
+ "twilio-connector",
+ "typeform-connector",
+ "woocommerce-connector",
+ "xero-connector",
  "zendesk-connector",
+ "zohocrm-connector",
+ "zoom-connector",
 ]
 
 [[package]]
@@ -248,6 +346,14 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "rand_core 0.10.1",
+]
+
+[[package]]
+name = "chargebee-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -326,6 +432,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "confluence-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "connector-sdk"
 version = "0.1.0"
 dependencies = [
@@ -388,6 +502,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "datadog-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "digest"
 version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -408,6 +530,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "docusign-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -578,6 +708,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "gcalendar-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "gdrive-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -640,6 +786,22 @@ name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
+
+[[package]]
+name = "grafana-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "greenhouse-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "h2"
@@ -734,6 +896,14 @@ name = "httparse"
 version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+
+[[package]]
+name = "hubspot-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "hybrid-array"
@@ -924,6 +1094,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "intercom-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "ipnet"
 version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -962,10 +1140,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsm-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "klaviyo-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+
+[[package]]
+name = "lever-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "libc"
@@ -1026,6 +1228,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112b39cec0b298b6c1999fee3e31427f74f676e4cb9879ed1a121b43661a4154"
 
 [[package]]
+name = "mailchimp-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "matchers"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1074,6 +1284,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "msgraph-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "nom"
 version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1081,6 +1299,14 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
+]
+
+[[package]]
+name = "notion-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -1129,10 +1355,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "okta-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "opsgenie-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "owo-colors"
@@ -1188,6 +1430,14 @@ checksum = "da983bc5e582ab17179c190b4b66c7d76c5943a69c6d34df2a2b6bf8a2977b05"
 dependencies = [
  "anyhow",
  "libc",
+]
+
+[[package]]
+name = "paypal-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -1361,6 +1611,14 @@ name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+
+[[package]]
+name = "pipedrive-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "postgres"
@@ -1605,6 +1863,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "recurly-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1837,6 +2103,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "sendgrid-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "sentry-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1911,6 +2193,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "servicenow-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "sha2"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1943,6 +2233,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "shopify-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1965,10 +2263,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
+name = "slack-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
+
+[[package]]
+name = "smartsheet-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "socket2"
@@ -1978,6 +2292,14 @@ checksum = "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "square-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -2042,6 +2364,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c64fc7232dd8d2e4ac5ce4ef302b1d81e0b80d055b9d77c7c4f51f6aa4c867d6"
 dependencies = [
  "is_ci",
+]
+
+[[package]]
+name = "surveymonkey-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -2419,6 +2749,22 @@ name = "try-lock"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+
+[[package]]
+name = "twilio-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "typeform-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
 
 [[package]]
 name = "typenum"
@@ -2867,6 +3213,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
+name = "woocommerce-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
 name = "writeable"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2879,6 +3233,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
+]
+
+[[package]]
+name = "xero-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
 ]
 
 [[package]]
@@ -2997,3 +3359,19 @@ name = "zmij"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+
+[[package]]
+name = "zohocrm-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]
+
+[[package]]
+name = "zoom-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+]

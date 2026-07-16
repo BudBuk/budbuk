@@ -12,7 +12,10 @@ use pgrx::pg_sys::panic::ErrorReport;
 use pgrx::PgSqlErrorCode;
 use supabase_wrappers::prelude::*;
 
-use connector_sdk::{Connector, Filter, Operator, Query, SortKey, Value as CValue};
+use connector_sdk::{
+    create_foreign_table_statements, Connector, Filter, ImportFilter, Operator, Query, SortKey,
+    Value as CValue,
+};
 use rest_connector::{RestConnector, SourceSpec};
 
 pgrx::pg_module_magic!(name, version);
@@ -79,6 +82,30 @@ impl ForeignDataWrapper<RestFdwError> for RestFdw {
             cursor: 0,
             tgt_cols: Vec::new(),
         })
+    }
+
+    /// `IMPORT FOREIGN SCHEMA` — auto-create a foreign table for every table
+    /// the connector discovers, so users don't hand-write DDL. Honors
+    /// `LIMIT TO` / `EXCEPT`.
+    fn import_foreign_schema(
+        &mut self,
+        stmt: ImportForeignSchemaStmt,
+    ) -> RestFdwResult<Vec<String>> {
+        let rt = create_async_runtime().map_err(|e| RestFdwError::Runtime(e.to_string()))?;
+        let schemas = rt
+            .block_on(self.connector.discover())
+            .map_err(|e| RestFdwError::Connector(e.to_string()))?;
+        let filter = match stmt.list_type {
+            ImportSchemaType::FdwImportSchemaLimitTo => ImportFilter::LimitTo(stmt.table_list),
+            ImportSchemaType::FdwImportSchemaExcept => ImportFilter::Except(stmt.table_list),
+            ImportSchemaType::FdwImportSchemaAll => ImportFilter::All,
+        };
+        Ok(create_foreign_table_statements(
+            &schemas,
+            &stmt.server_name,
+            &stmt.local_schema,
+            &filter,
+        ))
     }
 
     fn begin_scan(

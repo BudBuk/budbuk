@@ -11,6 +11,7 @@
 // `pub` makes it visible to code outside this crate.
 pub mod cache;
 pub mod connector;
+pub mod ddl;
 pub mod error;
 pub mod types;
 
@@ -18,5 +19,6 @@ pub mod types;
 // `connector_sdk::Connector` instead of `connector_sdk::connector::Connector`.
 pub use cache::{Cache, CacheMetrics, CacheMetricsSnapshot, CachedConnector};
 pub use connector::Connector;
+pub use ddl::{create_foreign_table_ddl, create_foreign_table_statements, pg_type, ImportFilter};
 pub use error::{ConnectorError, Result};
 pub use types::{Column, DataType, Filter, Operator, Query, Row, SortKey, TableSchema, Value};

@@ -7,6 +7,15 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **`IMPORT FOREIGN SCHEMA`** — zero-DDL mounting. `IMPORT FOREIGN SCHEMA x FROM
+  SERVER s INTO schema` auto-creates a foreign table for every table a connector
+  exposes (from `discover()`), honoring `LIMIT TO` / `EXCEPT`. Implemented in
+  `rest-fdw` and `graphql-fdw` over a pure, 100%-covered DDL generator in
+  `connector-sdk` (`create_foreign_table_statements`). Verified live against
+  GitLab.
+
 ### Added (GraphQL)
 
 - **Config-driven GraphQL engine** (`crates/graphql-connector`): the GraphQL twin

@@ -15,7 +15,10 @@ use pgrx::pg_sys::panic::ErrorReport;
 use pgrx::PgSqlErrorCode;
 use supabase_wrappers::prelude::*;
 
-use connector_sdk::{Connector, Filter, Operator, Query, SortKey, Value as CValue};
+use connector_sdk::{
+    create_foreign_table_statements, Connector, Filter, ImportFilter, Operator, Query, SortKey,
+    Value as CValue,
+};
 use graphql_connector::{GraphQlConnector, GraphQlSpec};
 
 pgrx::pg_module_magic!(name, version);
@@ -76,6 +79,29 @@ impl ForeignDataWrapper<GraphQlFdwError> for GraphqlFdw {
             cursor: 0,
             tgt_cols: Vec::new(),
         })
+    }
+
+    /// `IMPORT FOREIGN SCHEMA` — auto-create a foreign table for every table
+    /// the GraphQL spec exposes. Honors `LIMIT TO` / `EXCEPT`.
+    fn import_foreign_schema(
+        &mut self,
+        stmt: ImportForeignSchemaStmt,
+    ) -> GraphQlFdwResult<Vec<String>> {
+        let rt = create_async_runtime().map_err(|e| GraphQlFdwError::Runtime(e.to_string()))?;
+        let schemas = rt
+            .block_on(self.connector.discover())
+            .map_err(|e| GraphQlFdwError::Connector(e.to_string()))?;
+        let filter = match stmt.list_type {
+            ImportSchemaType::FdwImportSchemaLimitTo => ImportFilter::LimitTo(stmt.table_list),
+            ImportSchemaType::FdwImportSchemaExcept => ImportFilter::Except(stmt.table_list),
+            ImportSchemaType::FdwImportSchemaAll => ImportFilter::All,
+        };
+        Ok(create_foreign_table_statements(
+            &schemas,
+            &stmt.server_name,
+            &stmt.local_schema,
+            &filter,
+        ))
     }
 
     fn begin_scan(
