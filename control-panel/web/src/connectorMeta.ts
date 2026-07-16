@@ -174,3 +174,180 @@ export function monogram(name: string): string {
   if (letters.length === 0) return '?'
   return letters.slice(0, 2).toUpperCase()
 }
+
+// Map from connector name -> simple-icons slug, so cards and modals can show
+// the real brand logo via https://cdn.simpleicons.org/<slug>. Connectors not
+// listed here (or whose image fails to load) fall back to the monogram chip.
+export const SLUG: Record<string, string> = {
+  stripe: 'stripe',
+  github: 'github',
+  gitlab: 'gitlab',
+  slack: 'slack',
+  zendesk: 'zendesk',
+  pagerduty: 'pagerduty',
+  contentful: 'contentful',
+  asana: 'asana',
+  shopify: 'shopify',
+  intercom: 'intercom',
+  pipedrive: 'pipedrive',
+  sentry: 'sentry',
+  hubspot: 'hubspot',
+  mailchimp: 'mailchimp',
+  zoom: 'zoom',
+  okta: 'okta',
+  auth0: 'auth0',
+  twilio: 'twilio',
+  typeform: 'typeform',
+  calendly: 'calendly',
+  bitbucket: 'bitbucket',
+  square: 'square',
+  confluence: 'confluence',
+  woocommerce: 'woocommerce',
+  activecampaign: 'activecampaign',
+  surveymonkey: 'surveymonkey',
+  paypal: 'paypal',
+  box: 'box',
+  grafana: 'grafana',
+  klaviyo: 'klaviyo',
+  datadog: 'datadog',
+  xero: 'xero',
+  notion: 'notion',
+  docusign: 'docusign',
+  sendgrid: 'sendgrid',
+  greenhouse: 'greenhouse',
+  smartsheet: 'smartsheet',
+  // Brand slug differs from the connector name we use internally.
+  gdrive: 'googledrive',
+  gcalendar: 'googlecalendar',
+  zohocrm: 'zoho',
+  jsm: 'jira',
+  servicenow: 'servicenow',
+  freshdesk: 'freshdesk',
+}
+
+// The simple-icons slug for a connector, or null if we don't have one.
+export function slugFor(name: string): string | null {
+  return SLUG[name.toLowerCase()] ?? null
+}
+
+// Proper brand casing for display. The raw (lowercase) id is still what the
+// backend expects for API calls; this is only for what the user reads.
+export const DISPLAY_NAME: Record<string, string> = {
+  stripe: 'Stripe',
+  github: 'GitHub',
+  gitlab: 'GitLab',
+  zendesk: 'Zendesk',
+  pagerduty: 'PagerDuty',
+  freshdesk: 'Freshdesk',
+  contentful: 'Contentful',
+  asana: 'Asana',
+  shopify: 'Shopify',
+  intercom: 'Intercom',
+  pipedrive: 'Pipedrive',
+  sentry: 'Sentry',
+  hubspot: 'HubSpot',
+  slack: 'Slack',
+  mailchimp: 'Mailchimp',
+  zoom: 'Zoom',
+  servicenow: 'ServiceNow',
+  okta: 'Okta',
+  auth0: 'Auth0',
+  twilio: 'Twilio',
+  typeform: 'Typeform',
+  opsgenie: 'Opsgenie',
+  smartsheet: 'Smartsheet',
+  calendly: 'Calendly',
+  bitbucket: 'Bitbucket',
+  square: 'Square',
+  recurly: 'Recurly',
+  confluence: 'Confluence',
+  woocommerce: 'WooCommerce',
+  bigcommerce: 'BigCommerce',
+  zohocrm: 'Zoho CRM',
+  activecampaign: 'ActiveCampaign',
+  surveymonkey: 'SurveyMonkey',
+  sendgrid: 'SendGrid',
+  greenhouse: 'Greenhouse',
+  lever: 'Lever',
+  chargebee: 'Chargebee',
+  paypal: 'PayPal',
+  docusign: 'DocuSign',
+  box: 'Box',
+  jsm: 'Jira Service Management',
+  grafana: 'Grafana',
+  klaviyo: 'Klaviyo',
+  datadog: 'Datadog',
+  xero: 'Xero',
+  msgraph: 'Microsoft Graph',
+  gdrive: 'Google Drive',
+  gcalendar: 'Google Calendar',
+  notion: 'Notion',
+  openapi: 'OpenAPI',
+}
+
+// Proper brand casing, falling back to capitalizing the first letter.
+export function displayName(name: string): string {
+  const key = name.toLowerCase()
+  const known = DISPLAY_NAME[key]
+  if (known) return known
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
+// Marketing/home page per connector, for the external-link affordance.
+export const WEBSITE: Record<string, string> = {
+  stripe: 'https://stripe.com',
+  github: 'https://github.com',
+  gitlab: 'https://gitlab.com',
+  zendesk: 'https://www.zendesk.com',
+  pagerduty: 'https://www.pagerduty.com',
+  freshdesk: 'https://www.freshworks.com/freshdesk/',
+  contentful: 'https://www.contentful.com',
+  asana: 'https://asana.com',
+  shopify: 'https://www.shopify.com',
+  intercom: 'https://www.intercom.com',
+  pipedrive: 'https://www.pipedrive.com',
+  sentry: 'https://sentry.io',
+  hubspot: 'https://www.hubspot.com',
+  slack: 'https://slack.com',
+  mailchimp: 'https://mailchimp.com',
+  zoom: 'https://zoom.us',
+  servicenow: 'https://www.servicenow.com',
+  okta: 'https://www.okta.com',
+  auth0: 'https://auth0.com',
+  twilio: 'https://www.twilio.com',
+  typeform: 'https://www.typeform.com',
+  opsgenie: 'https://www.atlassian.com/software/opsgenie',
+  smartsheet: 'https://www.smartsheet.com',
+  calendly: 'https://calendly.com',
+  bitbucket: 'https://bitbucket.org',
+  square: 'https://squareup.com',
+  recurly: 'https://recurly.com',
+  confluence: 'https://www.atlassian.com/software/confluence',
+  woocommerce: 'https://woocommerce.com',
+  bigcommerce: 'https://www.bigcommerce.com',
+  zohocrm: 'https://www.zoho.com/crm/',
+  activecampaign: 'https://www.activecampaign.com',
+  surveymonkey: 'https://www.surveymonkey.com',
+  sendgrid: 'https://sendgrid.com',
+  greenhouse: 'https://www.greenhouse.io',
+  lever: 'https://www.lever.co',
+  chargebee: 'https://www.chargebee.com',
+  paypal: 'https://www.paypal.com',
+  docusign: 'https://www.docusign.com',
+  box: 'https://www.box.com',
+  jsm: 'https://www.atlassian.com/software/jira/service-management',
+  grafana: 'https://grafana.com',
+  klaviyo: 'https://www.klaviyo.com',
+  datadog: 'https://www.datadoghq.com',
+  xero: 'https://www.xero.com',
+  msgraph: 'https://developer.microsoft.com/graph',
+  gdrive: 'https://www.google.com/drive/',
+  gcalendar: 'https://calendar.google.com',
+  notion: 'https://www.notion.so',
+  openapi: 'https://www.openapis.org',
+}
+
+// Homepage URL for a connector, or null if we don't have one.
+export function websiteFor(name: string): string | null {
+  return WEBSITE[name.toLowerCase()] ?? null
+}

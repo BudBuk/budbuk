@@ -1,16 +1,28 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { getConnectors, getSources, type Connector, type Source } from './api'
-import Connectors from './components/Connectors'
-import MountSource from './components/MountSource'
-import Sources from './components/Sources'
+import Analytics from './components/Analytics'
+import Catalog from './components/Catalog'
+import MountModal from './components/MountModal'
+import SourcesView from './components/SourcesView'
+import { CatalogIcon, ChartIcon, Logo, SourcesIcon } from './components/icons'
 
 const POLL_MS = 5000
 
+type View = 'catalog' | 'sources' | 'analytics'
+
+const NAV: { id: View; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
+  { id: 'catalog', label: 'Catalog', icon: CatalogIcon },
+  { id: 'sources', label: 'Sources', icon: SourcesIcon },
+  { id: 'analytics', label: 'Analytics', icon: ChartIcon },
+]
+
 export default function App() {
+  const [view, setView] = useState<View>('catalog')
+  const [mounting, setMounting] = useState<Connector | null>(null)
+
   const [connectors, setConnectors] = useState<Connector[]>([])
   const [connectorsLoading, setConnectorsLoading] = useState(true)
   const [connectorsError, setConnectorsError] = useState<string | null>(null)
-  const [selected, setSelected] = useState<string | null>(null)
 
   const [sources, setSources] = useState<Source[]>([])
   const [sourcesLoading, setSourcesLoading] = useState(true)
@@ -39,56 +51,92 @@ export default function App() {
     }
   }, [])
 
-  // Initial load.
   useEffect(() => {
     void loadConnectors()
     void loadSources()
   }, [loadConnectors, loadSources])
 
-  const selectedConnector = useMemo(
-    () => connectors.find((c) => c.name === selected) ?? null,
-    [connectors, selected],
-  )
-
-  // Poll sources every ~5s. Keep the latest loader in a ref to avoid
-  // re-creating the interval on each render.
+  // Poll sources every ~5s to keep status live.
   const loadSourcesRef = useRef(loadSources)
   loadSourcesRef.current = loadSources
   useEffect(() => {
-    const id = window.setInterval(() => {
-      void loadSourcesRef.current()
-    }, POLL_MS)
+    const id = window.setInterval(() => void loadSourcesRef.current(), POLL_MS)
     return () => window.clearInterval(id)
   }, [])
 
+  function handleMounted() {
+    setMounting(null)
+    setView('sources')
+    void loadSources()
+  }
+
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="brand">
-          <span className="brand-mark">BB</span>
-          <h1>BudBuk Control Panel</h1>
+      <header className="topbar">
+        <div className="topbar-brand">
+          <Logo size={30} />
+          <span className="topbar-name">BudBuk</span>
+          <span className="topbar-tag">Control Panel</span>
+        </div>
+        <div className="topbar-status">
+          <span className="status-pill">
+            <span className="status-pill-dot" />
+            {sources.length} source{sources.length === 1 ? '' : 's'}
+          </span>
         </div>
       </header>
 
-      <main className="content">
-        <Connectors
-          connectors={connectors}
-          selected={selected}
-          loading={connectorsLoading}
-          error={connectorsError}
-          onSelect={setSelected}
+      <div className="layout">
+        <nav className="sidebar">
+          <div className="nav-section-label">Workspace</div>
+          {NAV.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              className={`nav-item${view === id ? ' nav-item-active' : ''}`}
+              onClick={() => setView(id)}
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+              {id === 'sources' && sources.length > 0 && (
+                <span className="nav-badge">{sources.length}</span>
+              )}
+            </button>
+          ))}
+          <div className="sidebar-foot">BudBuk · local control panel</div>
+        </nav>
+
+        <main className="main">
+          {view === 'catalog' && (
+            <Catalog
+              connectors={connectors}
+              loading={connectorsLoading}
+              error={connectorsError}
+              onOpen={setMounting}
+            />
+          )}
+          {view === 'sources' && (
+            <SourcesView
+              sources={sources}
+              loading={sourcesLoading}
+              error={sourcesError}
+              onChanged={loadSources}
+              onGoToCatalog={() => setView('catalog')}
+            />
+          )}
+          {view === 'analytics' && (
+            <Analytics sources={sources} loading={sourcesLoading} error={sourcesError} />
+          )}
+        </main>
+      </div>
+
+      {mounting && (
+        <MountModal
+          connector={mounting}
+          onClose={() => setMounting(null)}
+          onMounted={handleMounted}
         />
-        <MountSource
-          connector={selectedConnector}
-          onMounted={loadSources}
-        />
-        <Sources
-          sources={sources}
-          loading={sourcesLoading}
-          error={sourcesError}
-          onChanged={loadSources}
-        />
-      </main>
+      )}
     </div>
   )
 }
