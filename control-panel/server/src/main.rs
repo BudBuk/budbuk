@@ -32,7 +32,12 @@ use tower_http::services::{ServeDir, ServeFile};
 
 use catalog::spec_for;
 use connector_sdk::{Connector, Query, TableSchema};
+use graphql_connector::GraphQlConnector;
+use monday_connector::{monday_spec, MondayConfig};
 use rest_connector::RestConnector;
+
+/// GraphQL connectors (built on the GraphQL engine, not the REST catalog).
+const GRAPHQL_CONNECTORS: &[&str] = &["monday"];
 
 /// How many rows a sync pulls per table (full-refresh MVP).
 const SYNC_LIMIT: usize = 1000;
@@ -141,12 +146,46 @@ fn err(code: StatusCode, msg: impl Into<String>) -> Response {
 
 // ─────────────────────────────── engine ───────────────────────────────
 
+/// (key, required, secret) for a connector — from the REST catalog, or the
+/// GraphQL registry for GraphQL connectors.
+fn connector_options(name: &str) -> Vec<(&'static str, bool, bool)> {
+    match name {
+        "monday" => vec![("token", true, true), ("base_url", false, false)],
+        _ => catalog::options_for(name)
+            .into_iter()
+            .map(|o| (o.key, o.required, o.secret))
+            .collect(),
+    }
+}
+
+/// Build a connector — REST (via the catalog) or GraphQL — behind the trait.
 fn build_connector(
     connector: &str,
     options: &HashMap<String, String>,
-) -> Result<RestConnector, String> {
-    let spec = spec_for(connector, options).map_err(|e| e.to_string())?;
-    Ok(RestConnector::new(spec))
+) -> Result<Box<dyn Connector>, String> {
+    if GRAPHQL_CONNECTORS.contains(&connector) {
+        match connector {
+            "monday" => {
+                let token = options
+                    .get("token")
+                    .ok_or_else(|| "connector 'monday' requires the 'token' option".to_string())?;
+                let base_url = options
+                    .get("base_url")
+                    .cloned()
+                    .unwrap_or_else(|| "https://api.monday.com/v2".to_string());
+                Ok(Box::new(GraphQlConnector::new(monday_spec(
+                    &MondayConfig {
+                        base_url,
+                        token: token.clone(),
+                    },
+                ))))
+            }
+            other => Err(format!("unknown connector: {other}")),
+        }
+    } else {
+        let spec = spec_for(connector, options).map_err(|e| e.to_string())?;
+        Ok(Box::new(RestConnector::new(spec)))
+    }
 }
 
 /// Full-refresh a table into its shadow table. Returns the row count.
@@ -257,10 +296,12 @@ async fn source_table(
 async fn get_connectors() -> Response {
     let connectors: Vec<_> = catalog::list()
         .iter()
+        .copied()
+        .chain(GRAPHQL_CONNECTORS.iter().copied())
         .map(|name| {
-            let options: Vec<_> = catalog::options_for(name)
+            let options: Vec<_> = connector_options(name)
                 .into_iter()
-                .map(|o| json!({ "key": o.key, "required": o.required, "secret": o.secret }))
+                .map(|(key, required, secret)| json!({ "key": key, "required": required, "secret": secret }))
                 .collect();
             json!({ "name": name, "options": options })
         })
@@ -301,10 +342,10 @@ async fn post_source(State(st): State<AppState>, Json(req): Json<MountReq>) -> R
     }
 
     // Encrypt secret option values before storing them.
-    let secret_keys: Vec<String> = catalog::options_for(&req.connector)
+    let secret_keys: Vec<String> = connector_options(&req.connector)
         .into_iter()
-        .filter(|o| o.secret)
-        .map(|o| o.key.to_string())
+        .filter(|(_, _, secret)| *secret)
+        .map(|(key, _, _)| key.to_string())
         .filter(|k| req.options.contains_key(k))
         .collect();
     let mut stored = req.options.clone();

@@ -23,3 +23,5 @@ base64 = "0.22"
 connector-sdk = { path = "../../crates/connector-sdk" }
 catalog = { path = "../../crates/catalog" }
 rest-connector = { path = "../../crates/rest-connector" }
+graphql-connector = { path = "../../crates/graphql-connector" }
+monday-connector = { path = "../../crates/monday-connector" }

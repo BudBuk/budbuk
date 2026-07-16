@@ -1051,6 +1051,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "monday-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "graphql-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "msgraph-connector"
 version = "0.1.0"
 dependencies = [

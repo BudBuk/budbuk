@@ -1,0 +1,21 @@
+[package]
+name = "monday-connector"
+description = "BudBuk connector for Monday.com — boards, users, workspaces (GraphQL)."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+graphql-connector = { path = "../graphql-connector" }
+connector-sdk = { path = "../connector-sdk" }
+
+[dev-dependencies]
+wiremock.workspace = true
+serde_json.workspace = true
+tokio.workspace = true

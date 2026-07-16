@@ -59,6 +59,7 @@ const GROUPS: Record<string, Record<string, string>> = {
   },
   'Work, Docs & CMS': {
     asana: 'Work management — tasks, projects, teams',
+    monday: 'Work OS — boards, items, users, workspaces',
     smartsheet: 'Work management — sheets, rows, columns',
     notion: 'Docs & wiki — pages, databases, users',
     confluence: 'Team wiki — spaces, pages, content',
@@ -216,6 +217,7 @@ export const SLUG: Record<string, string> = {
   datadog: 'datadog',
   xero: 'xero',
   notion: 'notion',
+  monday: 'mondaydotcom',
   huggingface: 'huggingface',
   docusign: 'docusign',
   sendgrid: 'sendgrid',
@@ -287,6 +289,7 @@ export const DISPLAY_NAME: Record<string, string> = {
   gdrive: 'Google Drive',
   gcalendar: 'Google Calendar',
   notion: 'Notion',
+  monday: 'Monday.com',
   huggingface: 'Hugging Face',
   openapi: 'OpenAPI',
 }
@@ -350,6 +353,7 @@ export const WEBSITE: Record<string, string> = {
   gdrive: 'https://www.google.com/drive/',
   gcalendar: 'https://calendar.google.com',
   notion: 'https://www.notion.so',
+  monday: 'https://monday.com',
   huggingface: 'https://huggingface.co',
   openapi: 'https://www.openapis.org',
 }
