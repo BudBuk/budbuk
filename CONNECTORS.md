@@ -115,7 +115,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 42 | ✅ | **BigCommerce** | E-commerce | API token | Shopify alternative |
 | 43 | ⬜ | **Amazon Selling Partner (SP-API)** | E-commerce | LWA OAuth2 + AWS | Marketplace sellers |
 | 44 | ✅ | **Square** | Payments/POS | OAuth2 / token | SMB payments |
-| 45 | ⬜ | **Chargebee** | Subscription billing | API key | SaaS revenue |
+| 45 | ✅ | **Chargebee** | Subscription billing | API key | SaaS revenue |
 | 46 | ✅ | **Recurly** | Subscription billing | API key | Chargebee sibling |
 | 47 | ⬜ | **LinkedIn Ads** | Ads | OAuth2 | B2B marketing |
 | 48 | ⬜ | **TikTok Ads** | Ads | OAuth2 | Fast-growing |
@@ -144,9 +144,9 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 61 | ⬜ | **Marketo** | Marketing automation | OAuth2 (REST) | Enterprise MA |
 | 62 | ⬜ | **Salesforce Pardot** | Marketing automation | OAuth2 | B2B MA |
 | 63 | ✅ | **ActiveCampaign** | Marketing/CRM | API key | SMB MA |
-| 64 | ⬜ | **SendGrid** | Email delivery | API key | Transactional email |
+| 64 | ✅ | **SendGrid** | Email delivery | API key | Transactional email |
 | 65 | ✅ | **Typeform** | Forms | OAuth2 / PAT | Survey/lead data |
-| 66 | ⬜ | **SurveyMonkey** | Surveys | OAuth2 | Survey data |
+| 66 | ✅ | **SurveyMonkey** | Surveys | OAuth2 | Survey data |
 | 67 | ⬜ | **Google Search Console** | SEO | OAuth2 | Search performance |
 | 68 | ⬜ | **YouTube (Data/Analytics)** | Media | OAuth2 | Channel/video metrics |
 | 69 | ⬜ | **Twitter / X** | Social | OAuth2 | Social listening |
@@ -165,13 +165,13 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 77 | ⬜ | **Microsoft Dynamics 365** | CRM/ERP | OAuth2 (Dataverse) | Enterprise MS stack |
 | 78 | ⬜ | **Workday** | HR/Finance | OAuth2 / API | Enterprise HCM |
 | 79 | ⬜ | **BambooHR** | HR | API key | SMB/mid HR |
-| 80 | ⬜ | **Greenhouse** | Recruiting | API key | ATS data |
+| 80 | ✅ | **Greenhouse** | Recruiting | API key | ATS data |
 
 ## Tier 9 — HR/finance long tail, comms
 
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
-| 81 | ⬜ | **Lever** | Recruiting | API key / OAuth2 | Greenhouse sibling |
+| 81 | ✅ | **Lever** | Recruiting | API key / OAuth2 | Greenhouse sibling |
 | 82 | ⬜ | **Gusto** | Payroll | OAuth2 | SMB payroll |
 | 83 | ⬜ | **Rippling** | HR/IT | API key / OAuth2 | Fast-growing |
 | 84 | ⬜ | **ADP** | Payroll | OAuth2 (certs) | Enterprise payroll |

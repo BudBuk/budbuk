@@ -144,14 +144,17 @@ dependencies = [
  "bigcommerce-connector",
  "bitbucket-connector",
  "calendly-connector",
+ "chargebee-connector",
  "confluence-connector",
  "connector-sdk",
  "contentful-connector",
  "freshdesk-connector",
  "github-connector",
  "gitlab-connector",
+ "greenhouse-connector",
  "hubspot-connector",
  "intercom-connector",
+ "lever-connector",
  "mailchimp-connector",
  "okta-connector",
  "opsgenie-connector",
@@ -159,6 +162,7 @@ dependencies = [
  "pipedrive-connector",
  "recurly-connector",
  "rest-connector",
+ "sendgrid-connector",
  "sentry-connector",
  "serde_json",
  "servicenow-connector",
@@ -167,6 +171,7 @@ dependencies = [
  "smartsheet-connector",
  "square-connector",
  "stripe-connector",
+ "surveymonkey-connector",
  "thiserror 1.0.69",
  "tokio",
  "twilio-connector",
@@ -209,6 +214,17 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "rand_core",
+]
+
+[[package]]
+name = "chargebee-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
@@ -502,6 +518,17 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "wiremock",
+]
+
+[[package]]
+name = "greenhouse-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
  "wiremock",
 ]
 
@@ -823,6 +850,17 @@ name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+
+[[package]]
+name = "lever-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "libc"
@@ -1301,6 +1339,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "sendgrid-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "sentry-connector"
 version = "0.1.0"
 dependencies = [
@@ -1512,6 +1561,17 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "surveymonkey-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
 
 [[package]]
 name = "syn"

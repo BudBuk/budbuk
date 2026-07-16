@@ -39,6 +39,11 @@ members = [
     "crates/bigcommerce-connector",
     "crates/zohocrm-connector",
     "crates/activecampaign-connector",
+    "crates/surveymonkey-connector",
+    "crates/sendgrid-connector",
+    "crates/greenhouse-connector",
+    "crates/lever-connector",
+    "crates/chargebee-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

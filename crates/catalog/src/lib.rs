@@ -21,13 +21,16 @@ use auth0_connector::{auth0_spec, Auth0Config};
 use bigcommerce_connector::{bigcommerce_spec, BigCommerceConfig};
 use bitbucket_connector::{bitbucket_spec, BitbucketConfig};
 use calendly_connector::{calendly_spec, CalendlyConfig};
+use chargebee_connector::{chargebee_spec, ChargebeeConfig};
 use confluence_connector::{confluence_spec, ConfluenceConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
 use gitlab_connector::{gitlab_spec, GitLabConfig};
+use greenhouse_connector::{greenhouse_spec, GreenhouseConfig};
 use hubspot_connector::{hubspot_spec, HubspotConfig};
 use intercom_connector::{intercom_spec, IntercomConfig};
+use lever_connector::{lever_spec, LeverConfig};
 use mailchimp_connector::{mailchimp_spec, MailchimpConfig};
 use okta_connector::{okta_spec, OktaConfig};
 use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
@@ -35,6 +38,7 @@ use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
 use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
 use recurly_connector::{recurly_spec, RecurlyConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
+use sendgrid_connector::{sendgrid_spec, SendgridConfig};
 use sentry_connector::{sentry_spec, SentryConfig};
 use servicenow_connector::{servicenow_spec, ServiceNowConfig};
 use shopify_connector::{shopify_spec, ShopifyConfig};
@@ -42,6 +46,7 @@ use slack_connector::{slack_spec, SlackConfig};
 use smartsheet_connector::{smartsheet_spec, SmartsheetConfig};
 use square_connector::{square_spec, SquareConfig};
 use stripe_connector::stripe_spec;
+use surveymonkey_connector::{surveymonkey_spec, SurveymonkeyConfig};
 use twilio_connector::{twilio_spec, TwilioConfig};
 use typeform_connector::{typeform_spec, TypeformConfig};
 use woocommerce_connector::{woocommerce_spec, WooCommerceConfig};
@@ -95,6 +100,11 @@ pub fn list() -> &'static [&'static str] {
         "bigcommerce",
         "zohocrm",
         "activecampaign",
+        "surveymonkey",
+        "sendgrid",
+        "greenhouse",
+        "lever",
+        "chargebee",
         "openapi",
     ]
 }
@@ -307,6 +317,39 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
         "activecampaign" => Ok(activecampaign_spec(&ActiveCampaignConfig {
             base_url: require("base_url")?.to_string(),
             api_token: require("api_token")?.to_string(),
+        })),
+
+        "surveymonkey" => Ok(surveymonkey_spec(&SurveymonkeyConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.surveymonkey.com/v3")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "sendgrid" => Ok(sendgrid_spec(&SendgridConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.sendgrid.com/v3")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "greenhouse" => Ok(greenhouse_spec(&GreenhouseConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://harvest.greenhouse.io/v1")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "lever" => Ok(lever_spec(&LeverConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.lever.co/v1")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "chargebee" => Ok(chargebee_spec(&ChargebeeConfig {
+            base_url: require("base_url")?.to_string(),
+            api_key: require("api_key")?.to_string(),
         })),
 
         // Bring-your-own API: generate a spec from an OpenAPI document.
@@ -655,6 +698,48 @@ mod tests {
             ("bigcommerce", opts(&[])),
             ("zohocrm", opts(&[])),
             ("activecampaign", opts(&[])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch6_connectors_resolve_from_options() {
+        assert!(spec_for("surveymonkey", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("surveys")
+            .is_some());
+        assert!(spec_for("sendgrid", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("templates")
+            .is_some());
+        assert!(spec_for("greenhouse", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("candidates")
+            .is_some());
+        assert!(spec_for("lever", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("opportunities")
+            .is_some());
+        assert!(spec_for(
+            "chargebee",
+            &opts(&[
+                ("base_url", "https://x.chargebee.com/api/v2"),
+                ("api_key", "k")
+            ])
+        )
+        .unwrap()
+        .table("subscriptions")
+        .is_some());
+        for (name, o) in [
+            ("surveymonkey", opts(&[])),
+            ("sendgrid", opts(&[])),
+            ("greenhouse", opts(&[])),
+            ("lever", opts(&[])),
+            ("chargebee", opts(&[("api_key", "k")])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),

@@ -45,6 +45,11 @@ woocommerce-connector = { path = "../woocommerce-connector" }
 bigcommerce-connector = { path = "../bigcommerce-connector" }
 zohocrm-connector = { path = "../zohocrm-connector" }
 activecampaign-connector = { path = "../activecampaign-connector" }
+surveymonkey-connector = { path = "../surveymonkey-connector" }
+sendgrid-connector = { path = "../sendgrid-connector" }
+greenhouse-connector = { path = "../greenhouse-connector" }
+lever-connector = { path = "../lever-connector" }
+chargebee-connector = { path = "../chargebee-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

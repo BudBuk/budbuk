@@ -393,3 +393,54 @@ async fn batch5_connectors_span_the_catalog() {
     assert_eq!(wc_rows[0].0[0].to_display_string(), "7");
     assert_eq!(zc_rows[0].0[0].to_display_string(), "L1");
 }
+
+#[tokio::test]
+async fn batch6_connectors_span_the_catalog() {
+    //   sendgrid   — root array (bounces), Bearer
+    //   greenhouse — root array, Basic (api_key as username), Page
+    //   chargebee  — "/list" pointer with nested subscription.*, Basic
+    let sg = MockServer::start().await;
+    mount(
+        &sg,
+        "/suppression/bounces",
+        json!([{"email": "a@b.c", "reason": "550", "created": 123}]),
+    )
+    .await;
+    let gh = MockServer::start().await;
+    mount(
+        &gh,
+        "/candidates",
+        json!([{"id": 9, "first_name": "Ada", "last_name": "L"}]),
+    )
+    .await;
+    let cb = MockServer::start().await;
+    mount(
+        &cb,
+        "/subscriptions",
+        json!({"list": [{"subscription": {"id": "sub_1", "status": "active"}}]}),
+    )
+    .await;
+
+    let sg_rows = fetch(
+        "sendgrid",
+        &opts(&[("base_url", sg.uri().as_str()), ("api_key", "k")]),
+        "bounces",
+    )
+    .await;
+    let gh_rows = fetch(
+        "greenhouse",
+        &opts(&[("base_url", gh.uri().as_str()), ("api_key", "k")]),
+        "candidates",
+    )
+    .await;
+    let cb_rows = fetch(
+        "chargebee",
+        &opts(&[("base_url", cb.uri().as_str()), ("api_key", "k")]),
+        "subscriptions",
+    )
+    .await;
+
+    assert_eq!(sg_rows[0].0[0].to_display_string(), "a@b.c");
+    assert_eq!(gh_rows[0].0[0].to_display_string(), "9");
+    assert_eq!(cb_rows[0].0[0].to_display_string(), "sub_1"); // nested subscription.id survived
+}
