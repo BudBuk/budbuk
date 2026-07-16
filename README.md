@@ -21,6 +21,7 @@
   <a href="ROADMAP.md"><b>Roadmap</b></a> ·
   <a href="docs/configuration.md"><b>Configuration</b></a> ·
   <a href="CONNECTORS.md"><b>Connector tracker</b></a> ·
+  <a href="control-panel/"><b>Control panel</b></a> ·
   <a href="CONTRIBUTING.md"><b>Contributing</b></a>
 </p>
 

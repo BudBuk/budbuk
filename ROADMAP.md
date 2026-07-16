@@ -27,8 +27,8 @@ all Postgres-native.
 | rustls TLS (fork-safe inside the backend) | ✅ |
 | Live-verified in `psql` | ⚠️ ~5 of 50 (Jira, GitHub, Stripe, GitLab, GraphQL) |
 | Mounting foreign tables | ✅ `IMPORT FOREIGN SCHEMA` (auto) or manual |
-| Data materialization / sync | ❌ (live-only) |
-| Setup UI | ❌ |
+| Data materialization / sync | ✅ MVP — shadow tables + scheduled sync (control-panel) |
+| Setup UI | ✅ MVP — React control panel (mount, sync, preview) |
 | Agent access (MCP) | ❌ |
 
 ---
@@ -89,7 +89,7 @@ auto-created GitLab's tables and queried them, no crash.
 
 ---
 
-## Phase 2 — Shadow tables + interval sync
+## Phase 2 — Shadow tables + interval sync ✅ MVP DONE
 
 **Goal:** optionally keep a **materialized local copy** of any foreign table, refreshed on a
 schedule — turning BudBuk into a lightweight, Postgres-native ELT engine (Airbyte/Fivetran-
@@ -120,9 +120,15 @@ conflict/tombstone handling for deletes; back-pressure vs API rate limits.
 
 **Effort: medium–large.** This is the flagship differentiator.
 
+**Delivered (MVP):** `control-panel/` — a Rust (Axum) control-plane + tokio sync
+engine that materializes any mounted table into `shadow."<source>__<table>"`, and
+a React panel to drive it. Verified live: mounting GitLab and syncing `projects`
+materialized 1000 rows. Follow-ups: incremental/watermark sync, persistence,
+secrets. See [control-panel/README.md](control-panel/README.md).
+
 ---
 
-## Phase 3 — Control-plane API
+## Phase 3 — Control-plane API ✅ MVP DONE
 
 **Goal:** a programmatic layer so setup/secrets/sync are driven by an API, not raw SQL.
 
@@ -142,7 +148,7 @@ directly.
 
 ---
 
-## Phase 4 — React management console
+## Phase 4 — React management console ✅ MVP DONE
 
 **Goal:** point-and-click setup — nobody writes SQL to onboard a source.
 

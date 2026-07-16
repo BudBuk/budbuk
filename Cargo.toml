@@ -66,6 +66,7 @@ exclude = [
     "crates/jira-fdw",
     "crates/rest-fdw",
     "crates/graphql-fdw",
+    "control-panel/server",
 ]
 
 # Settings every member crate can inherit, so we set them in one place.

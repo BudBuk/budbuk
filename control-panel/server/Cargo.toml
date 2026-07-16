@@ -1,0 +1,22 @@
+[package]
+name = "budbuk-control-plane"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "BudBuk control plane: mount connectors, sync them into shadow tables, and serve the control panel."
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time", "net"] }
+tower-http = { version = "0.6", features = ["fs", "cors"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+deadpool-postgres = "0.14"
+tokio-postgres = "0.7"
+
+connector-sdk = { path = "../../crates/connector-sdk" }
+catalog = { path = "../../crates/catalog" }
+rest-connector = { path = "../../crates/rest-connector" }
