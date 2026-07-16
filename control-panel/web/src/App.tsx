@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { getConnectors, getSources, type Source } from './api'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { getConnectors, getSources, type Connector, type Source } from './api'
 import Connectors from './components/Connectors'
 import MountSource from './components/MountSource'
 import Sources from './components/Sources'
@@ -7,7 +7,7 @@ import Sources from './components/Sources'
 const POLL_MS = 5000
 
 export default function App() {
-  const [connectors, setConnectors] = useState<string[]>([])
+  const [connectors, setConnectors] = useState<Connector[]>([])
   const [connectorsLoading, setConnectorsLoading] = useState(true)
   const [connectorsError, setConnectorsError] = useState<string | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
@@ -45,6 +45,11 @@ export default function App() {
     void loadSources()
   }, [loadConnectors, loadSources])
 
+  const selectedConnector = useMemo(
+    () => connectors.find((c) => c.name === selected) ?? null,
+    [connectors, selected],
+  )
+
   // Poll sources every ~5s. Keep the latest loader in a ref to avoid
   // re-creating the interval on each render.
   const loadSourcesRef = useRef(loadSources)
@@ -74,7 +79,7 @@ export default function App() {
           onSelect={setSelected}
         />
         <MountSource
-          selectedConnector={selected}
+          connector={selectedConnector}
           onMounted={loadSources}
         />
         <Sources

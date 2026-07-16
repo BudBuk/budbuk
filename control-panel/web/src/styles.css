@@ -197,19 +197,187 @@ body {
   width: 80px;
 }
 
-/* Mount form */
-.options-editor {
+/* Connector catalog */
+.catalog-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 12px 0;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.option-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
+.catalog-search {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.catalog-count {
+  white-space: nowrap;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 18px;
+}
+
+.filter-chip {
+  display: inline-flex;
   align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.filter-chip:hover {
+  background: #f6f8fb;
+}
+
+.filter-chip-active {
+  font-weight: 600;
+}
+
+.filter-chip-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.filter-chip-active .filter-chip-dot {
+  display: none;
+}
+
+.filter-chip-count {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.65;
+}
+
+.connector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.connector-card {
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: box-shadow 0.14s ease, transform 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.connector-card:hover {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  transform: translateY(-2px);
+}
+
+.connector-card-selected {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+}
+
+.connector-icon {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.connector-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.connector-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.connector-badge {
+  align-self: flex-start;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.2px;
+}
+
+.connector-desc {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Mount form (schema-driven) */
+.mount-connector {
+  margin-top: 0;
+}
+
+.field-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 14px 0 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 460px;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field-required {
+  color: var(--err);
+  font-weight: 700;
+}
+
+.field-optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.field-input {
+  width: 100%;
+  padding: 9px 11px;
+  font-size: 13.5px;
+}
+
+.mount-error {
+  margin-top: 4px;
 }
 
 .form-actions {

@@ -16,6 +16,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 deadpool-postgres = "0.14"
 tokio-postgres = "0.7"
+aes-gcm = "0.10"
+rand = "0.8"
+base64 = "0.22"
 
 connector-sdk = { path = "../../crates/connector-sdk" }
 catalog = { path = "../../crates/catalog" }

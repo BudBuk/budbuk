@@ -15,8 +15,12 @@ control-panel/
 ## What it does
 
 - **Browse** all 50 built-in connectors.
-- **Mount** a source: pick a connector, enter credentials → the server validates
-  it and `discover()`s its tables.
+- **Browse** connectors in a searchable, category-filtered card grid (icons,
+  category badges, descriptions).
+- **Mount** a source: the form renders the connector's real fields (from the
+  catalog), masking secrets. On submit the server **validates the credentials**
+  by probing the API (a 1-row fetch), so bad creds are caught up front. Secret
+  values are **AES-256-GCM encrypted** before storage.
 - **Sync**: toggle a table on with an interval. The server calls the connector
   engine directly (no FDW), materializes rows into `shadow."<source>__<table>"`
   in PostgreSQL, and re-syncs on schedule. "Sync now" forces a refresh.
@@ -74,8 +78,10 @@ Working now: REST-catalog connectors (49), full-refresh sync, a tokio scheduler,
 in-memory source registry, shadow tables, the API, and all three panel screens.
 
 Deliberately deferred (see ROADMAP):
-- **Secrets** — credentials are held in memory only; no persistence and no
-  secrets backend yet. Don't use real production credentials.
+- **Secrets** — secret values are AES-256-GCM encrypted at rest (key from
+  `BUDBUK_SECRET_KEY`, or random per-process), but the source registry itself is
+  still in-memory and not persisted. A dedicated secrets backend + persistence
+  is the next step; don't rely on it for production credentials yet.
 - **Incremental sync** (watermark) — today each sync is a full refresh (capped
   at 1000 rows/table).
 - **Persistence** — sources reset on restart.

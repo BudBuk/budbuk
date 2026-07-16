@@ -1,51 +1,95 @@
-import { useState } from 'react'
-import { createSource } from '../api'
-
-interface OptionRow {
-  key: string
-  value: string
-}
+import { useEffect, useMemo, useState } from 'react'
+import { createSource, type Connector } from '../api'
 
 interface Props {
-  selectedConnector: string | null
+  connector: Connector | null
   onMounted: () => void
 }
 
-export default function MountSource({ selectedConnector, onMounted }: Props) {
-  const [rows, setRows] = useState<OptionRow[]>([{ key: '', value: '' }])
+// Human-friendly labels for known option keys. Anything not listed falls back
+// to a sentence-cased version of the raw key.
+const LABELS: Record<string, string> = {
+  api_key: 'API key',
+  api_token: 'API token',
+  base_url: 'Base URL',
+  app_password: 'App password',
+  account_sid: 'Account SID',
+  auth_token: 'Auth token',
+  access_token: 'Access token',
+  consumer_key: 'Consumer key',
+  consumer_secret: 'Consumer secret',
+  tenant_id: 'Tenant ID',
+  app_key: 'App key',
+  owner: 'Owner',
+  repo: 'Repo',
+  email: 'Email',
+  username: 'Username',
+  password: 'Password',
+  token: 'Token',
+  spec: 'Spec',
+}
+
+function humanizeLabel(key: string): string {
+  const override = LABELS[key]
+  if (override) return override
+  const words = key.split(/[_\s]+/).filter(Boolean)
+  if (words.length === 0) return key
+  return words
+    .map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+    .join(' ')
+}
+
+function placeholderFor(key: string): string {
+  if (key === 'base_url' || key.endsWith('_url') || key === 'url') {
+    return 'https://…'
+  }
+  if (key === 'email') return 'you@example.com'
+  return `Enter ${humanizeLabel(key).toLowerCase()}`
+}
+
+export default function MountSource({ connector, onMounted }: Props) {
+  const [values, setValues] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  function updateRow(index: number, patch: Partial<OptionRow>) {
-    setRows((prev) =>
-      prev.map((r, i) => (i === index ? { ...r, ...patch } : r)),
-    )
-  }
-
-  function addRow() {
-    setRows((prev) => [...prev, { key: '', value: '' }])
-  }
-
-  function removeRow(index: number) {
-    setRows((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  function resetForm() {
-    setRows([{ key: '', value: '' }])
+  // Reset the form whenever a different connector is selected.
+  const connectorName = connector?.name ?? null
+  useEffect(() => {
+    setValues({})
     setError(null)
+  }, [connectorName])
+
+  const options = connector?.options ?? []
+
+  const missingRequired = useMemo(
+    () =>
+      options.some(
+        (o) => o.required && (values[o.key] ?? '').trim() === '',
+      ),
+    [options, values],
+  )
+
+  function setValue(key: string, value: string) {
+    setValues((prev) => ({ ...prev, [key]: value }))
   }
 
   async function handleMount() {
-    if (!selectedConnector) return
+    if (!connector || missingRequired) return
     setBusy(true)
     setError(null)
-    const options: Record<string, string> = {}
-    for (const r of rows) {
-      if (r.key.trim() !== '') options[r.key.trim()] = r.value
+
+    // Build the options payload: required fields (validated non-empty) plus
+    // any optional field the user actually filled in.
+    const payload: Record<string, string> = {}
+    for (const o of options) {
+      const v = (values[o.key] ?? '').trim()
+      if (v !== '') payload[o.key] = v
     }
+
     try {
-      await createSource(selectedConnector, options)
-      resetForm()
+      await createSource(connector.name, payload)
+      setValues({})
+      setError(null)
       onMounted()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to mount source')
@@ -57,54 +101,62 @@ export default function MountSource({ selectedConnector, onMounted }: Props) {
   return (
     <section className="panel">
       <h2>Mount a source</h2>
-      {!selectedConnector ? (
+      {!connector ? (
         <p className="muted">Select a connector above to mount a source.</p>
       ) : (
         <>
-          <p>
-            Connector: <strong>{selectedConnector}</strong>
+          <p className="mount-connector">
+            Connector: <strong>{connector.name}</strong>
           </p>
-          <div className="options-editor">
-            {rows.map((row, i) => (
-              <div key={i} className="option-row">
-                <input
-                  className="input"
-                  placeholder="key"
-                  value={row.key}
-                  onChange={(e) => updateRow(i, { key: e.target.value })}
-                />
-                <input
-                  className="input"
-                  placeholder="value"
-                  value={row.value}
-                  onChange={(e) => updateRow(i, { value: e.target.value })}
-                />
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => removeRow(i)}
-                  disabled={rows.length === 1}
-                  aria-label="Remove option"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+
+          {options.length === 0 ? (
+            <p className="muted small">
+              This connector takes no options — just mount it.
+            </p>
+          ) : (
+            <div className="field-list">
+              {options.map((o) => {
+                const label = humanizeLabel(o.key)
+                return (
+                  <label key={o.key} className="field">
+                    <span className="field-label">
+                      {label}
+                      {o.required ? (
+                        <span className="field-required" aria-hidden="true">
+                          {' '}
+                          *
+                        </span>
+                      ) : (
+                        <span className="field-optional"> (optional)</span>
+                      )}
+                    </span>
+                    <input
+                      className="input field-input"
+                      type={o.secret ? 'password' : 'text'}
+                      value={values[o.key] ?? ''}
+                      required={o.required}
+                      autoComplete={o.secret ? 'new-password' : 'off'}
+                      placeholder={placeholderFor(o.key)}
+                      onChange={(e) => setValue(o.key, e.target.value)}
+                    />
+                  </label>
+                )
+              })}
+            </div>
+          )}
+
           <div className="form-actions">
-            <button type="button" className="btn btn-ghost" onClick={addRow}>
-              + Add option
-            </button>
             <button
               type="button"
               className="btn btn-primary"
               onClick={handleMount}
-              disabled={busy}
+              disabled={busy || missingRequired}
             >
               {busy ? 'Mounting…' : 'Mount'}
             </button>
           </div>
-          {error && <p className="error">{error}</p>}
+
+          {error && <p className="error mount-error">{error}</p>}
         </>
       )}
     </section>

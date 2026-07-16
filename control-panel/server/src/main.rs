@@ -9,6 +9,7 @@
 //! persisted — a secrets backend is a documented follow-up) and full-refresh
 //! sync (drop + reload).
 
+mod crypto;
 mod sql;
 
 use std::collections::HashMap;
@@ -43,14 +44,31 @@ struct AppState {
     pool: Pool,
     sources: Arc<RwLock<HashMap<String, Source>>>,
     ids: Arc<AtomicU64>,
+    cipher: Arc<crypto::Cipher>,
 }
 
 struct Source {
     id: String,
     connector: String,
+    /// Options as stored: values of `secret_keys` are AES-GCM ciphertext.
     options: HashMap<String, String>,
+    secret_keys: Vec<String>,
     tables: Vec<TableSchema>,
     syncs: HashMap<String, SyncState>,
+}
+
+/// Decrypt a source's secret option values back to plaintext for use.
+fn plaintext_options(
+    src: &Source,
+    cipher: &crypto::Cipher,
+) -> Result<HashMap<String, String>, String> {
+    let mut out = src.options.clone();
+    for k in &src.secret_keys {
+        if let Some(v) = out.get(k).cloned() {
+            out.insert(k.clone(), cipher.decrypt(&v)?);
+        }
+    }
+    Ok(out)
 }
 
 #[derive(Clone)]
@@ -229,13 +247,25 @@ async fn source_table(
         .find(|t| t.name == table)
         .cloned()
         .ok_or_else(|| err(StatusCode::BAD_REQUEST, format!("unknown table: {table}")))?;
-    Ok((src.connector.clone(), src.options.clone(), schema))
+    let opts = plaintext_options(src, &st.cipher)
+        .map_err(|e| err(StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    Ok((src.connector.clone(), opts, schema))
 }
 
 // ─────────────────────────────── routes ───────────────────────────────
 
 async fn get_connectors() -> Response {
-    Json(json!({ "connectors": catalog::list() })).into_response()
+    let connectors: Vec<_> = catalog::list()
+        .iter()
+        .map(|name| {
+            let options: Vec<_> = catalog::options_for(name)
+                .into_iter()
+                .map(|o| json!({ "key": o.key, "required": o.required, "secret": o.secret }))
+                .collect();
+            json!({ "name": name, "options": options })
+        })
+        .collect();
+    Json(json!({ "connectors": connectors })).into_response()
 }
 
 #[derive(Deserialize)]
@@ -254,11 +284,42 @@ async fn post_source(State(st): State<AppState>, Json(req): Json<MountReq>) -> R
         Ok(t) => t,
         Err(e) => return err(StatusCode::BAD_REQUEST, e.to_string()),
     };
+
+    // Validate the credentials actually have access: fetch one row from the
+    // first table. Auth/permission problems surface here instead of at sync time.
+    if let Some(first) = tables.first() {
+        let probe = Query {
+            limit: Some(1),
+            ..Default::default()
+        };
+        if let Err(e) = conn.fetch(&first.name, &probe).await {
+            return err(
+                StatusCode::BAD_REQUEST,
+                format!("credential check failed: {e}"),
+            );
+        }
+    }
+
+    // Encrypt secret option values before storing them.
+    let secret_keys: Vec<String> = catalog::options_for(&req.connector)
+        .into_iter()
+        .filter(|o| o.secret)
+        .map(|o| o.key.to_string())
+        .filter(|k| req.options.contains_key(k))
+        .collect();
+    let mut stored = req.options.clone();
+    for k in &secret_keys {
+        if let Some(v) = stored.get(k).cloned() {
+            stored.insert(k.clone(), st.cipher.encrypt(&v));
+        }
+    }
+
     let id = format!("s{}", st.ids.fetch_add(1, Ordering::SeqCst) + 1);
     let src = Source {
         id: id.clone(),
         connector: req.connector,
-        options: req.options,
+        options: stored,
+        secret_keys,
         tables,
         syncs: HashMap::new(),
     };
@@ -380,12 +441,14 @@ fn spawn_scheduler(st: AppState) {
                         };
                         if is_due {
                             if let Some(schema) = src.tables.iter().find(|t| &t.name == tname) {
-                                v.push((
-                                    src.id.clone(),
-                                    src.connector.clone(),
-                                    src.options.clone(),
-                                    schema.clone(),
-                                ));
+                                if let Ok(opts) = plaintext_options(src, &st.cipher) {
+                                    v.push((
+                                        src.id.clone(),
+                                        src.connector.clone(),
+                                        opts,
+                                        schema.clone(),
+                                    ));
+                                }
                             }
                         }
                     }
@@ -430,6 +493,7 @@ async fn main() -> anyhow::Result<()> {
         pool,
         sources: Arc::new(RwLock::new(HashMap::new())),
         ids: Arc::new(AtomicU64::new(0)),
+        cipher: Arc::new(crypto::Cipher::from_env()),
     };
     spawn_scheduler(state.clone());
 

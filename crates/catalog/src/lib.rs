@@ -13,6 +13,9 @@
 //!
 //! Adding a new standard connector = bundle its spec and add one match arm.
 
+pub mod options;
+pub use options::{options_for, OptionSpec};
+
 use std::collections::HashMap;
 
 use activecampaign_connector::{activecampaign_spec, ActiveCampaignConfig};

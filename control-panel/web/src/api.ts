@@ -1,7 +1,14 @@
 // Typed client for the BudBuk backend API.
 
+export interface ConnectorOption {
+  key: string
+  required: boolean
+  secret: boolean
+}
+
 export interface Connector {
   name: string
+  options: ConnectorOption[]
 }
 
 export interface Column {
@@ -53,9 +60,9 @@ async function handle<T>(res: Response): Promise<T> {
   return (await res.json()) as T
 }
 
-export async function getConnectors(): Promise<string[]> {
+export async function getConnectors(): Promise<Connector[]> {
   const res = await fetch('/api/connectors')
-  const body = await handle<{ connectors: string[] }>(res)
+  const body = await handle<{ connectors: Connector[] }>(res)
   return body.connectors
 }
 
