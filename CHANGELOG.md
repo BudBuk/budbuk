@@ -7,6 +7,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Segfault when querying an FDW live from PostgreSQL.** HTTP clients used
+  `native-tls`, which on macOS links Apple's Security.framework — a fork-unsafe
+  library. Inside a `fork()`ed PostgreSQL backend the TLS handshake crashed
+  (`SIGSEGV` in CoreAnalytics/`os_log` via `SecTrustCopyPublicKey`), taking down
+  the whole backend. Switched `reqwest` to **rustls** (pure-Rust TLS, no Apple
+  frameworks) across every connector and both FDWs, and added a `cargo-deny` ban
+  so `native-tls` can never be reintroduced. Verified end-to-end: the exact
+  query that crashed now returns live data.
+
 ### Added
 
 - **connector-sdk** crate: the reusable framework.

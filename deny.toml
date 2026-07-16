@@ -29,6 +29,14 @@ confidence-threshold = 0.9
 multiple-versions = "warn"
 wildcards = "allow"
 
+# Ban native-tls. On macOS it links Apple's Security.framework, which is
+# fork-unsafe and segfaults inside forked PostgreSQL backends during the TLS
+# handshake (crash observed 2026-07-16). All HTTP clients must use rustls.
+deny = [
+    { name = "native-tls" },
+    { name = "tokio-native-tls" },
+]
+
 [sources]
 # Only allow crates from the official registry.
 unknown-registry = "deny"
