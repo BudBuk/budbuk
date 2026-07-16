@@ -35,6 +35,11 @@ auth0-connector = { path = "../auth0-connector" }
 twilio-connector = { path = "../twilio-connector" }
 typeform-connector = { path = "../typeform-connector" }
 opsgenie-connector = { path = "../opsgenie-connector" }
+smartsheet-connector = { path = "../smartsheet-connector" }
+calendly-connector = { path = "../calendly-connector" }
+bitbucket-connector = { path = "../bitbucket-connector" }
+square-connector = { path = "../square-connector" }
+recurly-connector = { path = "../recurly-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]

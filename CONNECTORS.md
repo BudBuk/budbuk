@@ -114,9 +114,9 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 41 | ⬜ | **WooCommerce** | E-commerce | API key/secret | WordPress commerce |
 | 42 | ⬜ | **BigCommerce** | E-commerce | API token | Shopify alternative |
 | 43 | ⬜ | **Amazon Selling Partner (SP-API)** | E-commerce | LWA OAuth2 + AWS | Marketplace sellers |
-| 44 | ⬜ | **Square** | Payments/POS | OAuth2 / token | SMB payments |
+| 44 | ✅ | **Square** | Payments/POS | OAuth2 / token | SMB payments |
 | 45 | ⬜ | **Chargebee** | Subscription billing | API key | SaaS revenue |
-| 46 | ⬜ | **Recurly** | Subscription billing | API key | Chargebee sibling |
+| 46 | ✅ | **Recurly** | Subscription billing | API key | Chargebee sibling |
 | 47 | ⬜ | **LinkedIn Ads** | Ads | OAuth2 | B2B marketing |
 | 48 | ⬜ | **TikTok Ads** | Ads | OAuth2 | Fast-growing |
 | 49 | ⬜ | **Microsoft/Bing Ads** | Ads | OAuth2 + developer token | Search ads #2 |
@@ -127,7 +127,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | # | Status | Connector | Category | Auth | Notes |
 |---|--------|-----------|----------|------|-------|
 | 51 | ✅ | **Sentry** | Error tracking | auth token | Dev/observability |
-| 52 | ⬜ | **Bitbucket** | Dev | OAuth2 / app password | Atlassian repo host |
+| 52 | ✅ | **Bitbucket** | Dev | OAuth2 / app password | Atlassian repo host |
 | 53 | ⬜ | **Trello** | Work mgmt | API key + token | Atlassian boards |
 | 54 | ⬜ | **ClickUp** | Work mgmt | OAuth2 / API token | Growing PM tool |
 | 55 | ⬜ | **Jira Service Management** | ITSM | API token (Atlassian) | Reuses Jira work |
@@ -176,7 +176,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 83 | ⬜ | **Rippling** | HR/IT | API key / OAuth2 | Fast-growing |
 | 84 | ⬜ | **ADP** | Payroll | OAuth2 (certs) | Enterprise payroll |
 | 85 | ⬜ | **DocuSign** | E-signature | OAuth2 (JWT) | Contract data |
-| 86 | ⬜ | **Calendly** | Scheduling | OAuth2 / PAT | Booking data |
+| 86 | ✅ | **Calendly** | Scheduling | OAuth2 / PAT | Booking data |
 | 87 | ⬜ | **Gmail / Google Workspace** | Email | OAuth2 | Mailbox/audit data |
 | 88 | ⬜ | **Microsoft 365 / Outlook** | Email/Calendar | OAuth2 (Graph) | Enterprise mail |
 | 89 | ✅ | **Twilio** | Comms/SMS | API key (SID/token) | Messaging usage |
@@ -192,7 +192,7 @@ FDWs with a **connector catalog** (`crates/catalog`).
 | 94 | ✅ | **Opsgenie** | Incident | API key | PagerDuty sibling (Atlassian) |
 | 95 | ⬜ | **Zuora** | Billing | OAuth2 / token | Enterprise billing |
 | 96 | ⬜ | **RudderStack** | CDP | access token | Segment alternative |
-| 97 | ⬜ | **Smartsheet** | Work mgmt | API token / OAuth2 | Enterprise spreadsheets |
+| 97 | ✅ | **Smartsheet** | Work mgmt | API token / OAuth2 | Enterprise spreadsheets |
 | 98 | ⬜ | **Coda** | Docs | API token | Notion sibling |
 | 99 | ⬜ | **Generic GraphQL** | Meta | Configurable | One connector for any GraphQL API |
 | 100 | ⬜ | **Amazon Ads** | Ads | LWA OAuth2 | Retail media, growing |

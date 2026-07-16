@@ -279,3 +279,58 @@ async fn batch3_connectors_span_the_catalog() {
     assert_eq!(tw_rows[0].0[0].to_display_string(), "SM1");
     assert_eq!(og_rows[0].0[0].to_display_string(), "a1");
 }
+
+#[tokio::test]
+async fn batch4_connectors_span_the_catalog() {
+    //   smartsheet — "/data" pointer, Bearer, Page
+    //   bitbucket  — "/values" pointer, Basic, Page
+    //   recurly    — "/data" pointer, Basic (api_key as username)
+    let sm = MockServer::start().await;
+    mount(
+        &sm,
+        "/sheets",
+        json!({"data": [{"id": 1, "name": "Q1 Plan"}]}),
+    )
+    .await;
+    let bb = MockServer::start().await;
+    mount(
+        &bb,
+        "/repositories",
+        json!({"values": [{"uuid": "{r1}", "name": "app", "full_name": "acme/app"}]}),
+    )
+    .await;
+    let rc = MockServer::start().await;
+    mount(
+        &rc,
+        "/accounts",
+        json!({"data": [{"id": "a1", "code": "acme", "state": "active"}]}),
+    )
+    .await;
+
+    let sm_rows = fetch(
+        "smartsheet",
+        &opts(&[("base_url", sm.uri().as_str()), ("token", "t")]),
+        "sheets",
+    )
+    .await;
+    let bb_rows = fetch(
+        "bitbucket",
+        &opts(&[
+            ("base_url", bb.uri().as_str()),
+            ("username", "u"),
+            ("app_password", "p"),
+        ]),
+        "repositories",
+    )
+    .await;
+    let rc_rows = fetch(
+        "recurly",
+        &opts(&[("base_url", rc.uri().as_str()), ("api_key", "k")]),
+        "accounts",
+    )
+    .await;
+
+    assert_eq!(sm_rows[0].0[0].to_display_string(), "1");
+    assert_eq!(bb_rows[0].0[0].to_display_string(), "{r1}");
+    assert_eq!(rc_rows[0].0[0].to_display_string(), "a1");
+}

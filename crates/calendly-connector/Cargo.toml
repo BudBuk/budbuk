@@ -1,0 +1,21 @@
+[package]
+name = "calendly-connector"
+description = "BudBuk connector for Calendly — event_types, scheduled_events, organization_memberships (bearer)."
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+rest-connector = { path = "../rest-connector" }
+connector-sdk = { path = "../connector-sdk" }
+
+[dev-dependencies]
+wiremock.workspace = true
+serde_json.workspace = true
+tokio.workspace = true

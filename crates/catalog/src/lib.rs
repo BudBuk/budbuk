@@ -17,6 +17,8 @@ use std::collections::HashMap;
 
 use asana_connector::{asana_spec, AsanaConfig};
 use auth0_connector::{auth0_spec, Auth0Config};
+use bitbucket_connector::{bitbucket_spec, BitbucketConfig};
+use calendly_connector::{calendly_spec, CalendlyConfig};
 use contentful_connector::{contentful_spec, ContentfulConfig};
 use freshdesk_connector::{freshdesk_spec, FreshdeskConfig};
 use github_connector::{github_spec, GithubConfig};
@@ -28,11 +30,14 @@ use okta_connector::{okta_spec, OktaConfig};
 use opsgenie_connector::{opsgenie_spec, OpsgenieConfig};
 use pagerduty_connector::{pagerduty_spec, PagerDutyConfig};
 use pipedrive_connector::{pipedrive_spec, PipedriveConfig};
+use recurly_connector::{recurly_spec, RecurlyConfig};
 use rest_connector::{AuthSpec, ImportOptions, SourceSpec};
 use sentry_connector::{sentry_spec, SentryConfig};
 use servicenow_connector::{servicenow_spec, ServiceNowConfig};
 use shopify_connector::{shopify_spec, ShopifyConfig};
 use slack_connector::{slack_spec, SlackConfig};
+use smartsheet_connector::{smartsheet_spec, SmartsheetConfig};
+use square_connector::{square_spec, SquareConfig};
 use stripe_connector::stripe_spec;
 use twilio_connector::{twilio_spec, TwilioConfig};
 use typeform_connector::{typeform_spec, TypeformConfig};
@@ -75,6 +80,11 @@ pub fn list() -> &'static [&'static str] {
         "twilio",
         "typeform",
         "opsgenie",
+        "smartsheet",
+        "calendly",
+        "bitbucket",
+        "square",
+        "recurly",
         "openapi",
     ]
 }
@@ -220,6 +230,42 @@ pub fn spec_for(name: &str, options: &HashMap<String, String>) -> Result<SourceS
         "opsgenie" => Ok(opsgenie_spec(&OpsgenieConfig {
             base_url: get("base_url")
                 .unwrap_or("https://api.opsgenie.com/v2")
+                .to_string(),
+            api_key: require("api_key")?.to_string(),
+        })),
+
+        "smartsheet" => Ok(smartsheet_spec(&SmartsheetConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.smartsheet.com/2.0")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "calendly" => Ok(calendly_spec(&CalendlyConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.calendly.com")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "bitbucket" => Ok(bitbucket_spec(&BitbucketConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://api.bitbucket.org/2.0")
+                .to_string(),
+            username: require("username")?.to_string(),
+            app_password: require("app_password")?.to_string(),
+        })),
+
+        "square" => Ok(square_spec(&SquareConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://connect.squareup.com/v2")
+                .to_string(),
+            token: require("token")?.to_string(),
+        })),
+
+        "recurly" => Ok(recurly_spec(&RecurlyConfig {
+            base_url: get("base_url")
+                .unwrap_or("https://v3.recurly.com")
                 .to_string(),
             api_key: require("api_key")?.to_string(),
         })),
@@ -466,6 +512,45 @@ mod tests {
             ),
             ("typeform", opts(&[])),
             ("opsgenie", opts(&[])),
+        ] {
+            assert!(matches!(
+                spec_for(name, &o).unwrap_err(),
+                CatalogError::MissingOption { .. }
+            ));
+        }
+    }
+
+    #[test]
+    fn batch4_connectors_resolve_from_options() {
+        assert!(spec_for("smartsheet", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("sheets")
+            .is_some());
+        assert!(spec_for("calendly", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("event_types")
+            .is_some());
+        assert!(spec_for(
+            "bitbucket",
+            &opts(&[("username", "u"), ("app_password", "p")])
+        )
+        .unwrap()
+        .table("repositories")
+        .is_some());
+        assert!(spec_for("square", &opts(&[("token", "t")]))
+            .unwrap()
+            .table("customers")
+            .is_some());
+        assert!(spec_for("recurly", &opts(&[("api_key", "k")]))
+            .unwrap()
+            .table("accounts")
+            .is_some());
+        for (name, o) in [
+            ("smartsheet", opts(&[])),
+            ("calendly", opts(&[])),
+            ("bitbucket", opts(&[("username", "u")])),
+            ("square", opts(&[])),
+            ("recurly", opts(&[])),
         ] {
             assert!(matches!(
                 spec_for(name, &o).unwrap_err(),

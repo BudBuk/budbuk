@@ -29,6 +29,11 @@ members = [
     "crates/twilio-connector",
     "crates/typeform-connector",
     "crates/opsgenie-connector",
+    "crates/smartsheet-connector",
+    "crates/calendly-connector",
+    "crates/bitbucket-connector",
+    "crates/square-connector",
+    "crates/recurly-connector",
     "crates/catalog",
 ]
 # The pgrx FDW extension is excluded from the default workspace: it can't be

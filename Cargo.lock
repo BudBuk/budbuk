@@ -73,6 +73,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "bitbucket-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -91,11 +102,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
+name = "calendly-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "catalog"
 version = "0.1.0"
 dependencies = [
  "asana-connector",
  "auth0-connector",
+ "bitbucket-connector",
+ "calendly-connector",
  "connector-sdk",
  "contentful-connector",
  "freshdesk-connector",
@@ -108,12 +132,15 @@ dependencies = [
  "opsgenie-connector",
  "pagerduty-connector",
  "pipedrive-connector",
+ "recurly-connector",
  "rest-connector",
  "sentry-connector",
  "serde_json",
  "servicenow-connector",
  "shopify-connector",
  "slack-connector",
+ "smartsheet-connector",
+ "square-connector",
  "stripe-connector",
  "thiserror 1.0.69",
  "tokio",
@@ -1055,6 +1082,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "recurly-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1386,6 +1424,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 
 [[package]]
+name = "smartsheet-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
+]
+
+[[package]]
 name = "socket2"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1393,6 +1442,17 @@ checksum = "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "square-connector"
+version = "0.1.0"
+dependencies = [
+ "connector-sdk",
+ "rest-connector",
+ "serde_json",
+ "tokio",
+ "wiremock",
 ]
 
 [[package]]
