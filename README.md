@@ -9,7 +9,7 @@
   <a href="https://github.com/budbuk/budbuk/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/budbuk/budbuk/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Coverage" src="https://img.shields.io/badge/coverage-100%25%20lines-brightgreen">
   <img alt="License" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue">
-  <img alt="MSRV" src="https://img.shields.io/badge/rustc-1.85%2B-orange">
+  <img alt="MSRV" src="https://img.shields.io/badge/rustc-1.86%2B-orange">
 </p>
 
 ---

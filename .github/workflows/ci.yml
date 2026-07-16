@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         # stable + the declared MSRV (rust-version in Cargo.toml).
-        rust: [stable, "1.85"]
+        rust: [stable, "1.86"]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
