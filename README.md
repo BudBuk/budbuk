@@ -16,6 +16,14 @@
   <img alt="MSRV" src="https://img.shields.io/badge/rustc-1.88%2B-orange">
 </p>
 
+<p align="center">
+  <a href="#connectors"><b>Connectors</b></a> ·
+  <a href="ROADMAP.md"><b>Roadmap</b></a> ·
+  <a href="docs/configuration.md"><b>Configuration</b></a> ·
+  <a href="CONNECTORS.md"><b>Connector tracker</b></a> ·
+  <a href="CONTRIBUTING.md"><b>Contributing</b></a>
+</p>
+
 ---
 
 > **Status: working proof of concept.** BudBuk ships **50 out-of-the-box connectors**
@@ -414,6 +422,27 @@ residual being error-propagation branches that don't fire on a successful run).
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our
 [Code of Conduct](CODE_OF_CONDUCT.md). All PRs must pass CI, including the 100%
 line-coverage gate.
+
+## Contributors
+
+Thanks to everyone building BudBuk. This table grows with every merged PR.
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="150">
+      <a href="https://github.com/jigardafda">
+        <img src="https://github.com/jigardafda.png" width="80" height="80" alt="Jigar Dafda"><br>
+        <sub><b>Jigar Dafda</b></sub>
+      </a><br>
+      <sub>Creator &amp; maintainer</sub>
+    </td>
+    <!-- new contributors are added here -->
+  </tr>
+</table>
+
+See the full list on the [contributors graph](https://github.com/BudBuk/budbuk/graphs/contributors).
+Want to be on it? Pick up a [good first issue](https://github.com/BudBuk/budbuk/labels/good%20first%20issue)
+or a connector from the [tracker](CONNECTORS.md).
 
 ## Security
 
