@@ -376,6 +376,11 @@ residual being error-propagation branches that don't fire on a successful run).
 
 ## Roadmap
 
+> **Platform vision** — zero-DDL setup (`IMPORT FOREIGN SCHEMA`), background data sync
+> (shadow tables), a React management console, and an agent (MCP) layer — is mapped out in
+> **[ROADMAP.md](ROADMAP.md)**, with verified feasibility notes. The checklist below tracks
+> the engine.
+
 - [x] Connector SDK: `Connector` trait, neutral types, typed errors
 - [x] Jira connector: live REST fetching for projects, issues, users, worklogs
 - [x] Pagination (token-based and offset-based)
