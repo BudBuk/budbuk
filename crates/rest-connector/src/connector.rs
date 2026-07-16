@@ -276,6 +276,13 @@ fn apply_auth(req: reqwest::RequestBuilder, auth: &AuthSpec) -> reqwest::Request
         AuthSpec::Basic { username, password } => req.basic_auth(username, Some(password)),
         AuthSpec::ApiKeyHeader { header, value } => req.header(header.as_str(), value),
         AuthSpec::ApiKeyQuery { param, value } => req.query(&[(param.as_str(), value.as_str())]),
+        AuthSpec::Headers { headers } => {
+            let mut req = req;
+            for (k, v) in headers {
+                req = req.header(k.as_str(), v);
+            }
+            req
+        }
     }
 }
 

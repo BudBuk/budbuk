@@ -266,6 +266,24 @@ async fn bearer_auth_is_applied() {
 }
 
 #[tokio::test]
+async fn multiple_static_headers_are_applied() {
+    // Both fixed headers must reach the server (e.g. Notion's Authorization +
+    // Notion-Version, Datadog's two API keys).
+    let m = Mock::given(method("GET"))
+        .and(path("/items"))
+        .and(header("x-one", "1"))
+        .and(header("x-two", "2"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!([{"id": 1}])));
+    assert_auth_reaches_server(
+        AuthSpec::Headers {
+            headers: vec![("X-One".into(), "1".into()), ("X-Two".into(), "2".into())],
+        },
+        m,
+    )
+    .await;
+}
+
+#[tokio::test]
 async fn basic_auth_is_applied() {
     let m = Mock::given(method("GET"))
         .and(path("/items"))

@@ -46,6 +46,11 @@ pub enum AuthSpec {
     ApiKeyHeader { header: String, value: String },
     /// A fixed query parameter, e.g. `?api_key=<value>`.
     ApiKeyQuery { param: String, value: String },
+    /// A set of fixed request headers. For APIs that need more than one static
+    /// header — e.g. Notion (`Authorization` + `Notion-Version`), Datadog
+    /// (`DD-API-KEY` + `DD-APPLICATION-KEY`), or Xero (`Authorization` +
+    /// `Xero-tenant-id`).
+    Headers { headers: Vec<(String, String)> },
 }
 
 /// One table: an endpoint that returns a list of records.
@@ -202,6 +207,9 @@ mod tests {
             AuthSpec::ApiKeyQuery {
                 param: "k".into(),
                 value: "v".into(),
+            },
+            AuthSpec::Headers {
+                headers: vec![("A".into(), "1".into()), ("B".into(), "2".into())],
             },
         ] {
             let s = serde_json::to_string(&auth).unwrap();
