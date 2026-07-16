@@ -10,7 +10,7 @@ you agree to uphold it.
 
 ## Getting started
 
-1. Install Rust (1.85+):
+1. Install Rust (1.86+):
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
