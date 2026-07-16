@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { getConnectors, getSources, type Connector, type Source } from './api'
 import Analytics from './components/Analytics'
 import Catalog from './components/Catalog'
@@ -8,16 +9,14 @@ import { CatalogIcon, ChartIcon, Logo, SourcesIcon } from './components/icons'
 
 const POLL_MS = 5000
 
-type View = 'catalog' | 'sources' | 'analytics'
-
-const NAV: { id: View; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
-  { id: 'catalog', label: 'Catalog', icon: CatalogIcon },
-  { id: 'sources', label: 'Sources', icon: SourcesIcon },
-  { id: 'analytics', label: 'Analytics', icon: ChartIcon },
+const NAV: { to: string; label: string; icon: (p: { size?: number }) => JSX.Element }[] = [
+  { to: '/catalog', label: 'Catalog', icon: CatalogIcon },
+  { to: '/sources', label: 'Sources', icon: SourcesIcon },
+  { to: '/analytics', label: 'Analytics', icon: ChartIcon },
 ]
 
 export default function App() {
-  const [view, setView] = useState<View>('catalog')
+  const navigate = useNavigate()
   const [mounting, setMounting] = useState<Connector | null>(null)
 
   const [connectors, setConnectors] = useState<Connector[]>([])
@@ -66,7 +65,7 @@ export default function App() {
 
   function handleMounted() {
     setMounting(null)
-    setView('sources')
+    navigate('/sources')
     void loadSources()
   }
 
@@ -89,44 +88,54 @@ export default function App() {
       <div className="layout">
         <nav className="sidebar">
           <div className="nav-section-label">Workspace</div>
-          {NAV.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              type="button"
-              className={`nav-item${view === id ? ' nav-item-active' : ''}`}
-              onClick={() => setView(id)}
+          {NAV.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) => `nav-item${isActive ? ' nav-item-active' : ''}`}
             >
               <Icon size={18} />
               <span>{label}</span>
-              {id === 'sources' && sources.length > 0 && (
+              {to === '/sources' && sources.length > 0 && (
                 <span className="nav-badge">{sources.length}</span>
               )}
-            </button>
+            </NavLink>
           ))}
           <div className="sidebar-foot">BudBuk · local control panel</div>
         </nav>
 
         <main className="main">
-          {view === 'catalog' && (
-            <Catalog
-              connectors={connectors}
-              loading={connectorsLoading}
-              error={connectorsError}
-              onOpen={setMounting}
+          <Routes>
+            <Route path="/" element={<Navigate to="/catalog" replace />} />
+            <Route
+              path="/catalog"
+              element={
+                <Catalog
+                  connectors={connectors}
+                  loading={connectorsLoading}
+                  error={connectorsError}
+                  onOpen={setMounting}
+                />
+              }
             />
-          )}
-          {view === 'sources' && (
-            <SourcesView
-              sources={sources}
-              loading={sourcesLoading}
-              error={sourcesError}
-              onChanged={loadSources}
-              onGoToCatalog={() => setView('catalog')}
+            <Route
+              path="/sources"
+              element={
+                <SourcesView
+                  sources={sources}
+                  loading={sourcesLoading}
+                  error={sourcesError}
+                  onChanged={loadSources}
+                  onGoToCatalog={() => navigate('/catalog')}
+                />
+              }
             />
-          )}
-          {view === 'analytics' && (
-            <Analytics sources={sources} loading={sourcesLoading} error={sourcesError} />
-          )}
+            <Route
+              path="/analytics"
+              element={<Analytics sources={sources} loading={sourcesLoading} error={sourcesError} />}
+            />
+            <Route path="*" element={<Navigate to="/catalog" replace />} />
+          </Routes>
         </main>
       </div>
 

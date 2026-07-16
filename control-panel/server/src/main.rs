@@ -19,7 +19,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use axum::extract::{Path, Query as AxumQuery, State};
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use deadpool_postgres::{Config as PgConfig, Pool, Runtime};
@@ -27,8 +27,9 @@ use serde::Deserialize;
 use serde_json::json;
 use tokio::sync::RwLock;
 use tokio_postgres::NoTls;
+use tower::ServiceExt;
 use tower_http::cors::CorsLayer;
-use tower_http::services::{ServeDir, ServeFile};
+use tower_http::services::ServeDir;
 
 use catalog::spec_for;
 use connector_sdk::{Connector, Query, TableSchema};
@@ -541,13 +542,36 @@ async fn main() -> anyhow::Result<()> {
     let static_dir = std::env::var("STATIC_DIR").unwrap_or_else(|_| "../web/dist".into());
     let index = format!("{static_dir}/index.html");
 
+    // SPA fallback. A single handler serves everything that isn't an API route:
+    // if the request maps to a real file under STATIC_DIR (assets, favicon), that
+    // file is served with its normal status and content-type; otherwise — a
+    // client-side route like `/analytics` or a deep-linked refresh — we return
+    // index.html with a genuine 200 so the React router can take over.
+    //
+    // We deliberately do NOT use `ServeDir::not_found_service(...)`: tower-http
+    // forces that fallback's status to 404 even when it serves index.html, which
+    // is semantically wrong for SPA routes and breaks caching/health checks.
+    let index_html = std::fs::read_to_string(&index).unwrap_or_default();
+    let assets_dir = static_dir.clone();
+    let spa_fallback = move |req: axum::extract::Request| {
+        let assets_dir = assets_dir.clone();
+        let index_html = index_html.clone();
+        async move {
+            let served = ServeDir::new(&assets_dir).oneshot(req).await;
+            match served {
+                Ok(res) if res.status() != StatusCode::NOT_FOUND => res.map(axum::body::Body::new),
+                _ => Html(index_html).into_response(),
+            }
+        }
+    };
+
     let app = Router::new()
         .route("/api/connectors", get(get_connectors))
         .route("/api/sources", get(get_sources).post(post_source))
         .route("/api/sources/:id/syncs", post(post_sync))
         .route("/api/sources/:id/tables/:table/refresh", post(post_refresh))
         .route("/api/sources/:id/tables/:table/data", get(get_data))
-        .fallback_service(ServeDir::new(&static_dir).not_found_service(ServeFile::new(index)))
+        .fallback(spa_fallback)
         .layer(CorsLayer::permissive())
         .with_state(state);
 
