@@ -89,6 +89,9 @@ const GROUPS: Record<string, Record<string, string>> = {
     docusign: 'E-signature — envelopes, recipients, documents',
     gcalendar: 'Google Calendar — calendars, events, attendees',
   },
+  'AI & ML': {
+    huggingface: 'ML hub — models, datasets, spaces',
+  },
   Meta: {
     openapi: 'Generic OpenAPI — any spec-defined endpoints',
   },
@@ -124,6 +127,7 @@ export const CATEGORY_COLOR: Record<string, string> = {
   Observability: '#9333EA',
   'HR & Recruiting': '#10897B',
   'Finance & Other': '#B7791F',
+  'AI & ML': '#4F46E5',
   Meta: '#64748B',
   [FALLBACK_CATEGORY]: '#94A3B8',
 }
@@ -212,6 +216,7 @@ export const SLUG: Record<string, string> = {
   datadog: 'datadog',
   xero: 'xero',
   notion: 'notion',
+  huggingface: 'huggingface',
   docusign: 'docusign',
   sendgrid: 'sendgrid',
   greenhouse: 'greenhouse',
@@ -282,6 +287,7 @@ export const DISPLAY_NAME: Record<string, string> = {
   gdrive: 'Google Drive',
   gcalendar: 'Google Calendar',
   notion: 'Notion',
+  huggingface: 'Hugging Face',
   openapi: 'OpenAPI',
 }
 
@@ -344,6 +350,7 @@ export const WEBSITE: Record<string, string> = {
   gdrive: 'https://www.google.com/drive/',
   gcalendar: 'https://calendar.google.com',
   notion: 'https://www.notion.so',
+  huggingface: 'https://huggingface.co',
   openapi: 'https://www.openapis.org',
 }
 

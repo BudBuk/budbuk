@@ -32,6 +32,7 @@ import {
   siGooglecalendar,
   siZoho,
   siJira,
+  siHuggingface,
 } from 'simple-icons'
 import { categoryColor, metaFor, monogram, slugFor } from '../connectorMeta'
 
@@ -83,6 +84,7 @@ const ICONS: Record<string, BrandIcon> = {
   googlecalendar: siGooglecalendar,
   zoho: siZoho,
   jira: siJira,
+  huggingface: siHuggingface,
 }
 
 // Shows the real, bundled brand logo when available, otherwise the

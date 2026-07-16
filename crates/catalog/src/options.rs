@@ -133,6 +133,7 @@ pub fn options_for(name: &str) -> Vec<OptionSpec> {
         "gdrive" => vec![spec("token", true), spec("base_url", false)],
         "gcalendar" => vec![spec("token", true), spec("base_url", false)],
         "notion" => vec![spec("token", true), spec("base_url", false)],
+        "huggingface" => vec![spec("token", true), spec("base_url", false)],
         "openapi" => vec![
             spec("spec", true),
             spec("token", false),
@@ -179,7 +180,14 @@ mod tests {
         assert!(!gh.iter().find(|o| o.key == "owner").unwrap().secret);
 
         // Non-credential identifiers are not secret.
-        for key in ["email", "username", "account_sid", "consumer_key", "tenant_id", "spec"] {
+        for key in [
+            "email",
+            "username",
+            "account_sid",
+            "consumer_key",
+            "tenant_id",
+            "spec",
+        ] {
             assert!(!is_secret(key), "{key} wrongly flagged secret");
         }
     }

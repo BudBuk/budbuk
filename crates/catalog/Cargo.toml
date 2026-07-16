@@ -62,6 +62,7 @@ msgraph-connector = { path = "../msgraph-connector" }
 gdrive-connector = { path = "../gdrive-connector" }
 gcalendar-connector = { path = "../gcalendar-connector" }
 notion-connector = { path = "../notion-connector" }
+huggingface-connector = { path = "../huggingface-connector" }
 thiserror.workspace = true
 
 [dev-dependencies]
