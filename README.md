@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>A high-performance, PostgreSQL-native data integration platform in Rust.</strong><br>
-  Query Jira, GitHub, Slack, and other SaaS sources with plain SQL — fast, cached, and safe.
+  Query <strong>50+ SaaS sources</strong> — Jira, GitHub, Stripe, Slack, Salesforce-style CRMs, and more — with plain SQL. Fast, cached, and safe.
 </p>
 
 <p align="center">
@@ -14,11 +14,12 @@
 
 ---
 
-> **Status: working proof of concept.** The connector engine (schema discovery, live
-> REST fetching, pagination, caching, predicate pushdown, and observability) works
-> today against a real Jira Cloud instance — and a PostgreSQL Foreign Data Wrapper
-> (built on `pgrx`) lets you `SELECT` from it directly in `psql`. See
-> [Querying from PostgreSQL](#querying-from-postgresql-the-fdw).
+> **Status: working proof of concept.** BudBuk ships **50 out-of-the-box connectors**
+> plus generic **REST/OpenAPI** and **GraphQL** engines — all queryable from PostgreSQL
+> via a `pgrx` Foreign Data Wrapper. The engine (schema discovery, live fetching,
+> pagination, caching, predicate pushdown, observability) is proven live against real
+> Jira, GitHub, Stripe, GitLab, and GraphQL endpoints. See
+> [Connectors](#connectors) and [Querying from PostgreSQL](#querying-from-postgresql-the-fdw).
 
 ## What is BudBuk?
 
@@ -51,15 +52,44 @@ web APIs — without writing a single line of glue code per query.
   pagination, caching, and schema mapping. Adding a new source is mostly "implement
   one trait."
 
+## Connectors
+
+**50 sources ship out-of-the-box.** Mount any of them with just a connector name and
+credentials — exactly like Jira: `CREATE SERVER x OPTIONS (connector 'stripe', api_key '…')`.
+Each is a declarative `SourceSpec` over the shared engine (no bespoke HTTP code), at 100%
+line coverage. The long tail is covered by generic **REST/OpenAPI** and **GraphQL**
+connectors — bring your own spec or OpenAPI/introspection document.
+
+| Category | Connectors |
+|----------|------------|
+| **Dev & issues** | GitHub · GitLab · Bitbucket · Jira · Jira Service Management · Sentry |
+| **Support & ITSM** | Zendesk · Freshdesk · Intercom · ServiceNow · PagerDuty · Opsgenie |
+| **CRM & marketing** | HubSpot · Pipedrive · Zoho CRM · ActiveCampaign · Mailchimp · Klaviyo |
+| **Payments & billing** | Stripe · PayPal · Square · Chargebee · Recurly |
+| **E-commerce** | Shopify · WooCommerce · BigCommerce |
+| **Comms & meetings** | Slack · Zoom · Twilio · Calendly |
+| **Work, docs & CMS** | Asana · Smartsheet · Notion · Confluence · Contentful |
+| **Forms & email** | Typeform · SurveyMonkey · SendGrid |
+| **Identity & files** | Okta · Auth0 · Box · Google Drive · Microsoft Graph |
+| **Observability** | Datadog · Grafana |
+| **HR & recruiting** | Greenhouse · Lever |
+| **Finance & other** | Xero · DocuSign · Google Calendar |
+| **Meta (bring your own)** | Generic REST / OpenAPI · Generic GraphQL |
+
+📖 **See the full [connector tracker →](CONNECTORS.md)** for status, auth types, per-source
+notes, and the roadmap of what's next.
+
 ## Features
 
 | Area | What you get |
 |------|--------------|
+| **50 connectors** | Bundled `SourceSpec`s mount out-of-the-box via a **catalog** — just a name + credentials. |
+| **REST + GraphQL** | One config-driven REST engine *and* a GraphQL engine; generate specs from OpenAPI or GraphQL introspection. |
 | **Schema discovery** | Each connector exposes typed tables (columns + PostgreSQL-ish types). |
-| **Live fetching** | Async HTTP (`reqwest` + `tokio`) with typed JSON parsing (`serde`). |
-| **Pagination** | Handles both token-based (`nextPageToken`) and offset-based (`startAt`) paging. |
+| **Live fetching** | Async HTTP (`reqwest` + **rustls**) with typed JSON parsing (`serde`). |
+| **Pagination** | Offset, page-number, cursor (Stripe-style), and Relay GraphQL connections. |
 | **Caching** | In-memory TTL cache with **stale-while-revalidate** and a thundering-herd guard. |
-| **Predicate pushdown** | Translates `WHERE` / `ORDER BY` / `LIMIT` into the source's query language (JQL for Jira). |
+| **Predicate pushdown** | Translates `WHERE` / `ORDER BY` / `LIMIT` into the source's query params or query language (JQL for Jira). |
 | **Multi-account** | One connector *type*, many *instances* (e.g. two Jira accounts), with isolated credentials and namespaced caches. |
 | **Error handling** | Typed errors; network/auth/parse failures are contained, not fatal. |
 | **100% line coverage** | Enforced in CI; see [Development](#development). |
@@ -120,14 +150,16 @@ budbuk/
 │   │       ├── connector.rs    # RestConnector (auth, pagination, pushdown)
 │   │       ├── openapi.rs      # OpenAPI doc → SourceSpec importer
 │   │       └── cli.rs          # demo against JSONPlaceholder (no auth)
-│   ├── github-connector/  # GitHub as a SourceSpec over the engine (no HTTP code)
-│   │   └── src/lib.rs          # github_spec(): repos, issues, gists, orgs
+│   ├── graphql-connector/ # Config-driven GraphQL engine + introspection generator
+│   │   └── src/                # GraphQlSpec, GraphQlConnector, introspect.rs, cli.rs
+│   ├── <source>-connector/# 45+ bundled connectors, each a SourceSpec (no HTTP code):
+│   │   └── src/lib.rs          #   github, stripe, slack, hubspot, notion, datadog, …
+│   ├── catalog/           # Maps a connector name → bundled SourceSpec (out-of-the-box)
+│   │   ├── src/lib.rs          # spec_for("stripe", opts) → SourceSpec
+│   │   └── tests/              # cross-connector end-to-end tests
 │   ├── jira-fdw/          # PostgreSQL FDW for Jira (pgrx; excluded from workspace)
-│   │   ├── src/lib.rs          # ForeignDataWrapper → JiraConnector shim
-│   │   └── sql/example.sql     # CREATE SERVER / FOREIGN TABLE example
-│   └── rest-fdw/          # Generic PostgreSQL FDW: any SourceSpec → SQL (pgrx)
-│       ├── src/lib.rs          # ForeignDataWrapper → RestConnector from a spec
-│       └── sql/example.sql     # query GitHub from psql
+│   ├── rest-fdw/          # Generic REST FDW: any SourceSpec/catalog name → SQL (pgrx)
+│   └── graphql-fdw/       # Generic GraphQL FDW: any GraphQlSpec → SQL (pgrx)
 ├── docs/                  # design specs
 ├── .github/workflows/     # CI + release
 └── Makefile               # dev tasks
@@ -289,6 +321,11 @@ and other filters run in Postgres. The connector **catalog** (`crates/catalog`) 
 name to a bundled `SourceSpec` — adding a standard connector is "bundle a spec, add one
 line".
 
+**GraphQL sources** work the same way through `crates/graphql-fdw`: mount a serialized
+`GraphQlSpec` (hand-written or generated from schema introspection) and query it in SQL,
+with Relay cursor pagination handled for you. Example in
+[`crates/graphql-fdw/sql/example.sql`](crates/graphql-fdw/sql/example.sql).
+
 📖 **Full setup reference — every connector, plus multiple accounts (e.g. two Jira sites)
 and the isolation/security model — is in [docs/configuration.md](docs/configuration.md).**
 A runnable example is in [`crates/rest-fdw/sql/example.sql`](crates/rest-fdw/sql/example.sql).
@@ -353,10 +390,14 @@ residual being error-propagation branches that don't fire on a successful run).
 - [x] **OpenAPI → `SourceSpec` importer** — auto-generate a connector from an
       OpenAPI document (`SourceSpec::from_openapi`); imports **Stripe's official
       104-table spec** directly, with cursor pagination auto-detected
-- [x] **GitHub** connector (`github-connector`) — repos/issues/gists/orgs as a
-      `SourceSpec` over the engine, no bespoke HTTP code
+- [x] **50 out-of-the-box connectors** via a bundled **catalog** — GitHub, Stripe,
+      Slack, HubSpot, Notion, Datadog, and 44 more mount with just a name + credentials
+      (see [Connectors](#connectors) / the [tracker](CONNECTORS.md))
+- [x] **GraphQL** connector (`graphql-connector`) — config-driven engine, Relay cursor
+      pagination, and an **introspection → spec generator**, plus a generic GraphQL FDW
+- [x] `AuthSpec::Headers` for multi-header APIs (Notion, Datadog, Klaviyo, Xero)
+- [ ] Generic **SQL database** connector (Postgres/MySQL/etc. as a source)
 - [ ] More connectors — see the prioritized [connector tracker](CONNECTORS.md)
-      (the GraphQL importer and generic SQL connector unlock ~25 more sources)
 - [ ] Docker-based local development environment
 
 ## Contributing
