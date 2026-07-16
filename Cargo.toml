@@ -72,7 +72,7 @@ exclude = [
 [workspace.package]
 edition = "2021"
 version = "0.1.0"
-rust-version = "1.82.0"
+rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 authors = ["The BudBuk Authors"]
 repository = "https://github.com/budbuk/budbuk"
